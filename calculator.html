@@ -26,6 +26,7 @@
       <a href="index.html">HOME</a>
       <a href="mine.html">MINE</a>
       <a href="dashboard.html">DASHBOARD</a>
+      <a href="calculator.html" class="active">CALCULATOR</a>
       <a href="faq.html">FAQ</a>
       <a class="discord" href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD ↗</a>
     </div>
@@ -34,7 +35,7 @@
   <header class="container hero" style="padding:54px 0 18px">
     <p class="kicker">// MINING CALCULATOR</p>
     <h1 style="font-size:clamp(28px,4.6vw,46px)">Estimate the haul.</h1>
-    <p class="lede">Pick your card or type a hashrate. Block reward and pool fee are pulled live; the network hashrate is your assumption until the pool's live feed is wired up.</p>
+    <p class="lede">Pick your card or type a hashrate. Block reward, pool fee, and the live PRL price are pulled in automatically; the network hashrate is your assumption until the pool's live feed is wired up.</p>
   </header>
 
   <section class="container" style="padding-bottom:60px">
@@ -67,7 +68,7 @@
         </div>
 
         <div class="field">
-          <label>PRL PRICE <span class="muted" style="letter-spacing:0;text-transform:none">— optional, for USD (via SafeTrade)</span></label>
+          <label>PRL PRICE <span class="muted" id="price-src" style="letter-spacing:0;text-transform:none">— fetching live price…</span></label>
           <div class="inrow"><input id="price" type="number" min="0" step="any" placeholder="0.00" /><span class="unit">USD</span></div>
         </div>
       </div>
@@ -163,6 +164,21 @@
     if(nh){ document.getElementById("net").value=(Number(nh)/1e18).toFixed(1); document.getElementById("net-src").textContent="— live"; }
     calc(); PP.mockNotice();
   });
+
+  // live PRL/USD price from CoinGecko (CORS-enabled public API)
+  function loadPrice(){
+    fetch("https://api.coingecko.com/api/v3/simple/price?ids=pearl-2&vs_currencies=usd&include_24hr_change=true",{cache:"no-store"})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var o=d&&d["pearl-2"]; if(!o||o.usd==null) throw 0;
+        document.getElementById("price").value=o.usd;
+        var ch=o.usd_24h_change;
+        document.getElementById("price-src").textContent="— live $"+Number(o.usd).toFixed(4)+(ch!=null?" ("+(ch>=0?"+":"")+Number(ch).toFixed(2)+"% 24h)":"")+" · CoinGecko";
+        calc();
+      })
+      .catch(function(){ document.getElementById("price-src").textContent="— enter a price for USD estimates"; });
+  }
+  loadPrice();
   calc();
 })();
 </script>
