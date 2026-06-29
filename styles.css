@@ -1,22 +1,33 @@
 /* Pearler Pool — shared design system (Stake-style monochrome / IBM Plex Mono) */
 :root{
   --bg:#07090e; --surface-1:rgba(233,230,221,.03); --surface-2:rgba(233,230,221,.055);
-  --fg:#e9e6dd; --muted:#727884; --faint:#4a5059;
+  --fg:#e9e6dd; --muted:#8b919c; --faint:#5a606b;
   --line:rgba(233,230,221,.14); --line-2:rgba(233,230,221,.08);
   --gold:#c9a84c; --pearl:#fff3d0; --bad:#c2705f;
+  --nav-bg:rgba(7,9,14,.72); --grid:rgba(233,230,221,.07); --dot:#fff3d0;
+  --rain-bg:#07090e; --rain-ch:233,230,221;
   --maxw:1120px;
+}
+:root[data-theme="light"]{
+  --bg:#f4f1e9; --surface-1:rgba(24,26,32,.04); --surface-2:rgba(24,26,32,.07);
+  --fg:#1b1d23; --muted:#4f535b; --faint:#767b85;
+  --line:rgba(24,26,32,.17); --line-2:rgba(24,26,32,.10);
+  --gold:#8a6a16; --pearl:#8a6a16; --bad:#b0492f;
+  --nav-bg:rgba(244,241,233,.82); --grid:rgba(24,26,32,.10); --dot:#8a6a16;
+  --rain-bg:#f4f1e9; --rain-ch:60,64,74;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--fg);font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;
-  -webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh}
+  -webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh;
+  transition:background-color .25s ease,color .25s ease}
 a{color:inherit;text-decoration:none}
 #rain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
 .page{position:relative;z-index:1}
 .container{max-width:var(--maxw);margin:0 auto;padding:0 28px}
 
 /* nav */
-.nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);background:rgba(7,9,14,.72);
+.nav{position:sticky;top:0;z-index:20;backdrop-filter:blur(8px);background:var(--nav-bg);
   border-bottom:1px solid var(--line)}
 .nav .inner{max-width:var(--maxw);margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:10px;font-size:14px;letter-spacing:2px}
@@ -27,6 +38,11 @@ a{color:inherit;text-decoration:none}
 .nav-links a.active{color:var(--fg);border-color:var(--line)}
 .nav-links a.discord{color:var(--gold);border:1px solid rgba(201,168,76,.35)}
 .nav-links a.discord:hover{background:rgba(201,168,76,.1)}
+.theme-toggle{font-family:inherit;font-size:12px;letter-spacing:2px;color:var(--muted);background:transparent;
+  border:1px solid var(--line);padding:8px 12px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:7px;line-height:1}
+.theme-toggle:hover{color:var(--fg);border-color:var(--fg)}
+.donut svg circle:first-of-type{stroke:var(--line)}
+.donut #donut-arc{stroke:var(--gold)}
 
 /* type */
 h1,h2,h3{font-weight:500;letter-spacing:-.4px}
@@ -96,15 +112,15 @@ h1,h2,h3{font-weight:500;letter-spacing:-.4px}
 .codeblock{position:relative;border:1px solid var(--line);background:#04060b;margin-top:14px}
 .codeblock pre{padding:16px 18px;overflow-x:auto;font-size:12.5px;line-height:1.7;color:#cdd6db;white-space:pre}
 .codeblock .copy{position:absolute;top:10px;right:10px;font-family:inherit;font-size:10px;letter-spacing:1px;
-  border:1px solid var(--line);background:rgba(7,9,14,.8);color:var(--muted);padding:6px 10px;cursor:pointer;transition:.2s}
-.codeblock .copy:hover{color:var(--fg);border-color:var(--fg)}
-.codeblock .copy.done{color:var(--gold);border-color:var(--gold)}
+  border:1px solid rgba(233,230,221,.18);background:rgba(7,9,14,.8);color:#9099a5;padding:6px 10px;cursor:pointer;transition:.2s}
+.codeblock .copy:hover{color:#e9e6dd;border-color:#e9e6dd}
+.codeblock .copy.done{color:#c9a84c;border-color:#c9a84c}
 .prompt{border-color:rgba(201,168,76,.3)}
 .prompt .tag{position:absolute;top:-1px;left:-1px;font-size:10px;letter-spacing:1px;color:#0a1628;
-  background:var(--gold);padding:4px 10px}
+  background:#c9a84c;padding:4px 10px}
 .prompt pre{padding-top:34px;color:#e7ddc6}
 /* codex prompt — same gold family, outline tag to differentiate from Claude */
-.prompt.codex .tag{background:transparent;color:var(--gold);border:1px solid var(--gold);padding:3px 9px}
+.prompt.codex .tag{background:transparent;color:#c9a84c;border:1px solid #c9a84c;padding:3px 9px}
 .prompt-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-top:6px}
 .prompt-row .codeblock{margin-top:0}
 

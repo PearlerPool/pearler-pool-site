@@ -112,15 +112,42 @@
     document.body.appendChild(d);
   }
   function rain(id) {
-    var c = document.getElementById(id); if (!c) return; var x = c.getContext("2d"), fs = 14, cols, drops, frame = 0;
-    function size() { c.width = innerWidth; c.height = innerHeight; cols = Math.ceil(c.width / (fs * 1.5)); drops = []; for (var i = 0; i < cols; i++) drops[i] = Math.random() * c.height / fs; x.fillStyle = "#07090e"; x.fillRect(0, 0, c.width, c.height); }
-    size(); addEventListener("resize", size);
-    (function loop() { requestAnimationFrame(loop); frame++; if (frame % 2) return; x.fillStyle = "rgba(7,9,14,0.12)"; x.fillRect(0, 0, c.width, c.height); x.font = "400 " + fs + 'px "IBM Plex Mono",monospace'; for (var i = 0; i < cols; i++) { var ch = Math.random() < .5 ? "0" : "1", px = i * fs * 1.5, py = drops[i] * fs, b = Math.random() < .02; x.fillStyle = "rgba(233,230,221," + (b ? .4 : .06) + ")"; x.fillText(ch, px, py); if (py > c.height && Math.random() > .975) drops[i] = 0; drops[i] += .3; } })();
+    var c = document.getElementById(id); if (!c) return; var x = c.getContext("2d"), fs = 14, cols, drops, frame = 0, rb = "#07090e", rc = "233,230,221";
+    function read() { var s = getComputedStyle(document.documentElement); rb = (s.getPropertyValue("--rain-bg") || "#07090e").trim() || "#07090e"; rc = (s.getPropertyValue("--rain-ch") || "233,230,221").trim() || "233,230,221"; }
+    function bg() { x.globalAlpha = 1; x.fillStyle = rb; x.fillRect(0, 0, c.width, c.height); }
+    function size() { c.width = innerWidth; c.height = innerHeight; cols = Math.ceil(c.width / (fs * 1.5)); drops = []; for (var i = 0; i < cols; i++) drops[i] = Math.random() * c.height / fs; bg(); }
+    read(); size(); addEventListener("resize", size);
+    addEventListener("pp-theme", function () { read(); bg(); });
+    (function loop() { requestAnimationFrame(loop); frame++; if (frame % 2) return; x.globalAlpha = 0.12; x.fillStyle = rb; x.fillRect(0, 0, c.width, c.height); x.globalAlpha = 1; x.font = "400 " + fs + 'px "IBM Plex Mono",monospace'; for (var i = 0; i < cols; i++) { var ch = Math.random() < .5 ? "0" : "1", px = i * fs * 1.5, py = drops[i] * fs, b = Math.random() < .02; x.fillStyle = "rgba(" + rc + "," + (b ? .4 : .06) + ")"; x.fillText(ch, px, py); if (py > c.height && Math.random() > .975) drops[i] = 0; drops[i] += .3; } })();
   }
 
   PP.api = api; PP.job = job; PP.subs = subs; PP.blocksFound = blocksFound; PP.activeMiners = activeMiners;
   PP.feePct = feePct; PP.rewardPRL = rewardPRL; PP.topMiners = topMiners; PP.blockList = blockList; PP.workerList = workerList;
   PP.num = num; PP.grainsToPRL = grainsToPRL; PP.addrShort = addrShort; PP.ago = ago;
   PP.countUp = countUp; PP.copy = copy; PP.mockNotice = mockNotice; PP.rain = rain;
+
+  /* ---------- dark / light theme toggle ---------- */
+  function initTheme() {
+    var KEY = "pp-theme", root = document.documentElement;
+    try { if (localStorage.getItem(KEY) === "light") root.setAttribute("data-theme", "light"); } catch (e) {}
+    var links = document.querySelector(".nav-links");
+    if (!links || document.getElementById("theme-btn")) return;
+    var btn = document.createElement("button");
+    btn.id = "theme-btn"; btn.type = "button"; btn.className = "theme-toggle";
+    btn.setAttribute("aria-label", "Toggle light and dark mode");
+    function label() { btn.textContent = root.getAttribute("data-theme") === "light" ? "◑ DARK" : "◐ LIGHT"; }
+    label();
+    btn.addEventListener("click", function () {
+      var light = root.getAttribute("data-theme") === "light";
+      if (light) { root.removeAttribute("data-theme"); try { localStorage.setItem(KEY, "dark"); } catch (e) {} }
+      else { root.setAttribute("data-theme", "light"); try { localStorage.setItem(KEY, "light"); } catch (e) {} }
+      label(); dispatchEvent(new Event("pp-theme"));
+    });
+    var d = links.querySelector("a.discord");
+    if (d) links.insertBefore(btn, d); else links.appendChild(btn);
+  }
+  PP.initTheme = initTheme;
   global.PP = PP;
+  if (document.readyState !== "loading") initTheme();
+  else document.addEventListener("DOMContentLoaded", initTheme);
 })(window);

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>(function(){try{var t=localStorage.getItem('pp-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 <title>Dashboard — Pearler Pool</title>
 <meta name="description" content="Pearler Pool dashboard — look up any prl1 address for workers, balances, payouts, a daily estimate, and a performance history no other Pearl pool offers." />
 <meta name="theme-color" content="#07090e" />
@@ -340,8 +341,11 @@
     var allT=[]; series.forEach(function(s){s.pts.forEach(function(p){allT.push(p.t);});});
     var t0=Math.min.apply(0,allT), t1=Math.max.apply(0,allT); if(t1===t0)t1=t0+1;
     function X(t){return pad+(t-t0)/(t1-t0)*(w-pad*2);}
-    // gridlines
-    ctx.strokeStyle="rgba(233,230,221,.07)";ctx.lineWidth=1;
+    var cs=getComputedStyle(document.documentElement);
+    var GRID=(cs.getPropertyValue("--grid")||"rgba(233,230,221,.07)").trim();
+    var DOT=(cs.getPropertyValue("--dot")||"#fff3d0").trim();
+    var GOLD=(cs.getPropertyValue("--gold")||"#c9a84c").trim();
+    ctx.strokeStyle=GRID;ctx.lineWidth=1;
     for(var g=0;g<=3;g++){var gy=pad+g/3*(h-pad*2);ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(w-pad,gy);ctx.stroke();}
     series.forEach(function(s){
       var ys=s.pts.map(function(p){return p.v;}); var y0=Math.min.apply(0,ys),y1=Math.max.apply(0,ys); if(y1===y0)y1=y0+1;
@@ -352,8 +356,8 @@
         ctx.lineTo(X(s.pts[s.pts.length-1].t),h-pad);ctx.lineTo(X(s.pts[0].t),h-pad);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
       }
       ctx.beginPath();ctx.moveTo(X(s.pts[0].t),Y(s.pts[0].v));s.pts.forEach(function(p){ctx.lineTo(X(p.t),Y(p.v));});
-      ctx.strokeStyle=s.color;ctx.lineWidth=s.width;ctx.stroke();
-      if(s.fill){var lp=s.pts[s.pts.length-1];ctx.fillStyle="#fff3d0";ctx.beginPath();ctx.arc(X(lp.t),Y(lp.v),3,0,6.29);ctx.fill();}
+      ctx.strokeStyle=s.fill?GOLD:s.color;ctx.lineWidth=s.width;ctx.stroke();
+      if(s.fill){var lp=s.pts[s.pts.length-1];ctx.fillStyle=DOT;ctx.beginPath();ctx.arc(X(lp.t),Y(lp.v),3,0,6.29);ctx.fill();}
     });
   }
 
@@ -421,6 +425,7 @@
   document.getElementById("addr").addEventListener("keydown",function(e){if(e.key==="Enter")lookup();});
   if(location.hash.length>4){var a=decodeURIComponent(location.hash.slice(1));document.getElementById("addr").value=a;lookup(a);}
   addEventListener("resize",function(){drawProduction();if(MINER)drawHistory();});
+  addEventListener("pp-theme",function(){drawProduction();if(MINER)drawHistory();});
 })();
 </script>
 </body>
