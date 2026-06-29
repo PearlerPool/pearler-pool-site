@@ -40,7 +40,7 @@
       <input id="addr" placeholder="your prl1… payout address (optional)" spellcheck="false" />
       <button id="addr-apply">APPLY</button>
     </div>
-    <p class="muted" style="font-size:11.5px;margin-top:12px;letter-spacing:.5px">Base pool network fee is <span class="gold">1%</span> (live from /pool/info) — it applies to every option below.</p>
+    <p class="muted" style="font-size:12.5px;margin-top:12px;letter-spacing:.5px">Base pool network fee is <span class="gold">1%</span> (live from /pool/info) — it applies to every option below.</p>
   </header>
 
   <!-- THE FOUR OPTIONS -->
@@ -169,16 +169,16 @@
       var d=OPTIONS[key], pane=document.createElement("div");
       pane.className="pane"+(i===0?" active":""); pane.id="pane-"+key;
       var html=feeBlock(d.fee,d.feeNote)+
-        '<p class="muted" style="font-size:13px;line-height:1.9;margin-bottom:8px">'+d.title+'</p>';
+        '<p class="muted" style="font-size:14.5px;line-height:1.9;margin-bottom:8px">'+d.title+'</p>';
 
       if(d.type==="docker"){
         html+='<div class="codeblock"><button class="copy" data-text="cmd-'+key+'">COPY</button><pre id="cmd-'+key+'"></pre></div>'+
-          '<p class="muted" style="font-size:11.5px;margin:14px 0 4px;letter-spacing:.5px">Or let an AI agent do the whole setup — copy a prompt and paste it into <span class="gold">Claude Code</span>, <span class="gold">Claude in Cowork</span>, or <span class="gold">OpenAI Codex</span>. Each prompt is self-contained: it carries all the pool settings and tells the agent exactly what to do.</p>'+
+          '<p class="muted" style="font-size:12.5px;margin:14px 0 4px;letter-spacing:.5px">Or let an AI agent do the whole setup — copy a prompt and paste it into <span class="gold">Claude Code</span>, <span class="gold">Claude in Cowork</span>, or <span class="gold">OpenAI Codex</span>. Each prompt is self-contained: it carries all the pool settings and tells the agent exactly what to do.</p>'+
           '<div class="prompt-row">'+
             '<div class="codeblock prompt"><span class="tag">CLAUDE PROMPT</span><button class="copy" data-text="prc-'+key+'">COPY PROMPT</button><pre id="prc-'+key+'"></pre></div>'+
             '<div class="codeblock prompt codex"><span class="tag">CODEX PROMPT</span><button class="copy" data-text="prx-'+key+'">COPY PROMPT</button><pre id="prx-'+key+'"></pre></div>'+
           '</div>'+
-          '<p class="muted" style="font-size:11.5px;margin-top:10px;letter-spacing:.3px">The agent checks your GPU/Docker, verifies the image, runs the container over TLS, tails the logs until shares are accepted, self-fixes failures, then reports back and shows you on the dashboard. Docker image names are placeholders until the pool operator confirms the real builds — the prompt detects this and asks you for the confirmed name rather than failing silently.</p>';
+          '<p class="muted" style="font-size:12.5px;margin-top:10px;letter-spacing:.3px">The agent checks your GPU/Docker, verifies the image, runs the container over TLS, tails the logs until shares are accepted, self-fixes failures, then reports back and shows you on the dashboard. Docker image names are placeholders until the pool operator confirms the real builds — the prompt detects this and asks you for the confirmed name rather than failing silently.</p>';
       } else { // connect
         html+='<div class="grid c2" style="align-items:start">'+
             '<div class="panel"><div class="card kv" style="border:none;background:none;padding:0">'+
