@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FAQ — Pearler Pool</title>
+<meta name="description" content="Everything you need to start mining Pearl (PRL) with Pearler Pool — fees, payouts, supported GPUs, how to connect, and troubleshooting." />
+<meta name="theme-color" content="#07090e" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="FAQ — Pearler Pool" />
+<meta property="og:description" content="Fees, payouts, supported GPUs, how to connect, and troubleshooting for Pearl (PRL) miners." />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307090e'/%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c9a84c'/%3E%3Ccircle cx='12.5' cy='12.5' r='3' fill='%23fff3d0'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<canvas id="rain"></canvas>
+<div class="page">
+  <nav class="nav"><div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>PEARLER POOL</a>
+    <div class="nav-links">
+      <a href="index.html">HOME</a>
+      <a href="mine.html">MINE</a>
+      <a href="dashboard.html">DASHBOARD</a>
+      <a href="faq.html" class="active">FAQ</a>
+      <a class="discord" href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD ↗</a>
+    </div>
+  </div></nav>
+
+  <header class="container hero" style="padding:54px 0 22px">
+    <p class="kicker">// FAQ &amp; GETTING STARTED</p>
+    <h1 style="font-size:clamp(28px,4.6vw,46px)">Everything a pearler needs.</h1>
+    <p class="lede">New to Pearl mining or just to our pool — start here. Still stuck? The <a class="gold" href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">Discord</a> has real people.</p>
+  </header>
+
+  <section class="container" style="padding-bottom:60px">
+    <div class="prose">
+
+      <p class="faq-cat">// THE BASICS</p>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">01</span><span>What is Pearler Pool?</span></div>
+        <div class="faq-a">A mining pool for the Pearl (PRL) coin. You point your GPU at the pool, it combines everyone's work, and rewards are split fairly by contribution using PPLNS. Members are <span class="gold">pearlers</span>. No solo mining — pooled only, so payouts are smooth instead of all-or-nothing.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">02</span><span>What is Pearl (PRL)?</span></div>
+        <div class="faq-a">Pearl is a Layer-1 blockchain that secures itself with <strong>proof-of-useful-work</strong>: instead of throwing away hashes, miners run large matrix multiplications — the same math behind AI training and inference — and attach a zero-knowledge proof so the network can verify the work cheaply (the team calls it NoisyGEMM). Mainnet launched 27 April 2026; max supply is 2.1 billion PRL, with a new block roughly every ~3 minutes. PRL trades on SafeTrade. More in <a href="about.html">About</a>.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">03</span><span>What does PPLNS mean?</span></div>
+        <div class="faq-a">Pay-Per-Last-N-Shares. When the pool finds a block, the reward is split across the most recent window of submitted shares, in proportion to how many each miner contributed. It rewards steady mining and resists reward-hopping. Our PPLNS window is read live from the pool.</div>
+      </div>
+
+      <p class="faq-cat">// FEES &amp; PAYOUTS</p>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">04</span><span>What are the fees?</span></div>
+        <div class="faq-a">A <strong>1% pool network fee</strong> applies to every option (read live from the pool). On top of that, your choice of miner sets a software fee: our own Pearler miner is <strong>2%</strong>; the open-source, official, and bring-your-own options add <strong>0%</strong> — so those pay only the 1% pool fee. The fee for each option is shown on the <a href="mine.html">Mine</a> page.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">05</span><span>How and when do I get paid?</span></div>
+        <div class="faq-a">Rewards accrue to your <code>prl1…</code> payout address as you submit shares, split via PPLNS each time the pool finds a block. Your paid and pending balances show on the <a href="dashboard.html">Dashboard</a> when you look up your address. Payout cadence and the minimum payout are set by the pool operator — check the <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">Discord</a> for the current values.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">06</span><span>How do I track my earnings?</span></div>
+        <div class="faq-a">Open the <a href="dashboard.html">Dashboard</a> and paste your <code>prl1…</code> address — you'll see balances, per-worker stats, a daily estimate, and a performance trend that builds from your first visit. That historical "go back in time" view is something no other Pearl pool offers.</div>
+      </div>
+
+      <p class="faq-cat">// MINING</p>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">07</span><span>What GPUs can I use?</span></div>
+        <div class="faq-a">Pearl's proof-of-useful-work needs the tensor cores in modern GPUs. In practice that's <strong>NVIDIA Turing and newer</strong> (RTX 20/30/40/50 series, plus A100/H100-class cards) and recent <strong>AMD Radeon RX 6000/7000</strong>. Pre-tensor-core cards (GTX 10-series and older) and CPU-only mining aren't supported. Rough hashrates per card are in the <a href="calculator.html">calculator</a>.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">08</span><span>How do I start? (the easy way)</span></div>
+        <div class="faq-a">Go to the <a href="mine.html">Mine</a> page, paste your <code>prl1…</code> address, pick an option, and copy the <strong>Claude or Codex deploy prompt</strong>. Paste it into Claude Code, Claude in Cowork, or OpenAI Codex and the AI agent does the whole setup — checks your GPU and Docker, runs the miner, and confirms shares are landing. Prefer to do it yourself? Each option also shows a ready-to-run command.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">09</span><span>Can I use a miner I already have?</span></div>
+        <div class="faq-a">Yes — option 4 on the <a href="mine.html">Mine</a> page, "connect your own," gives you the stratum settings: host, TLS and plain ports, your username as <code>&lt;address&gt;.&lt;worker&gt;</code>, password <code>x</code>. No extra software fee, just the 1% pool fee.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">10</span><span>Windows, macOS or Linux?</span></div>
+        <div class="faq-a">Linux + NVIDIA is the smoothest path. Windows works through Docker Desktop with the WSL2 backend. On macOS, Docker can't pass through the GPU, so GPU mining with these images isn't supported there. The AI deploy prompts detect your OS and adapt.</div>
+      </div>
+
+      <p class="faq-cat">// SAFETY</p>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">11</span><span>Is it safe? Do I share any keys?</span></div>
+        <div class="faq-a">You only ever share your <strong>public payout address</strong> (<code>prl1…</code>) — that is not a secret and is all the pool needs. Never paste a private key or wallet seed into a miner, a prompt, or anywhere else. Our deploy prompts are written to refuse handling secrets.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">12</span><span>Do I need to register?</span></div>
+        <div class="faq-a">No accounts, no sign-up. Your address is your identity — start mining and look it up on the dashboard.</div>
+      </div>
+
+      <p class="faq-cat">// TROUBLESHOOTING</p>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">13</span><span>My miner runs but I see no shares.</span></div>
+        <div class="faq-a">Check the worker authorized first, then wait — the first accepted share usually lands within a minute. If you see TLS or auth errors, try the plain port instead of TLS, and confirm your username is <code>&lt;your-prl1-address&gt;.&lt;worker&gt;</code> with password <code>x</code>. Still nothing? Drop the log lines in <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">Discord</a>.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">14</span><span>Why does hashrate show "soon"?</span></div>
+        <div class="faq-a">The pool is new and the live hashrate feed isn't wired up yet, so anywhere a hashrate would appear we show "soon" rather than a fake number. Blocks, shares, balances and payouts are all live now; hashrate and effort will switch on once the feed is available.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q"><span class="qn">15</span><span>My address isn't on the dashboard yet.</span></div>
+        <div class="faq-a">A new address only appears after your first accepted share is recorded. Give it a few minutes of mining, then look it up again. The leaderboard and blocks lists also fill in as the pool grows.</div>
+      </div>
+
+    </div>
+
+    <div style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn gold" href="mine.html">START MINING →</a>
+      <a class="btn" href="dashboard.html">OPEN DASHBOARD</a>
+    </div>
+  </section>
+
+  <footer class="footer"><div class="inner">
+    <span>PEARLERPOOL.COM</span>
+    <span class="foot-links"><a href="index.html">HOME</a> · <a href="mine.html">MINE</a> · <a href="dashboard.html">DASHBOARD</a> · <a href="calculator.html">CALCULATOR</a> · <a href="faq.html">FAQ</a> · <a href="about.html">ABOUT</a> · <a href="terms.html">TERMS</a> · <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD</a></span>
+    <span>EST. 2026</span>
+  </div></footer>
+</div>
+<script src="assets/api.js"></script>
+<script>PP.rain("rain");</script>
+</body>
+</html>

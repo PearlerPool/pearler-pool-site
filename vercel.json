@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/pool-api/:path*", "destination": "https://p2.pearlerpool.com/:path*" },
+    { "source": "/assets/:path*", "destination": "/:path*" }
+  ]
+}

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — Pearler Pool</title>
+<meta name="description" content="Pearler Pool dashboard — look up any prl1 address for workers, balances, payouts, a daily estimate, and a performance history no other Pearl pool offers." />
+<meta name="theme-color" content="#07090e" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Dashboard — Pearler Pool" />
+<meta property="og:description" content="Look up any prl1 address: workers, balances, payouts, daily estimate, and a performance trend that builds over time." />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307090e'/%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c9a84c'/%3E%3Ccircle cx='12.5' cy='12.5' r='3' fill='%23fff3d0'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<canvas id="rain"></canvas>
+<div class="page">
+  <nav class="nav"><div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>PEARLER POOL</a>
+    <div class="nav-links">
+      <a href="index.html">HOME</a>
+      <a href="mine.html">MINE</a>
+      <a href="dashboard.html" class="active">DASHBOARD</a>
+      <a href="faq.html">FAQ</a>
+      <a class="discord" href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD ↗</a>
+    </div>
+  </div></nav>
+
+  <header class="container hero" style="padding:54px 0 22px">
+    <p class="kicker">// DASHBOARD</p>
+    <h1 style="font-size:clamp(28px,4.4vw,46px)">Track the hunt.</h1>
+    <p style="max-width:62ch">Look up any <span class="gold">prl1…</span> address for workers, balances, payouts and a performance trend that builds from your first visit — historical data no other Pearl pool gives you.</p>
+    <div class="lookup" style="margin-top:22px">
+      <input id="addr" placeholder="prl1… payout address" spellcheck="false" />
+      <button id="go">LOOK UP</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- sub-tabs + range -->
+    <div class="subtabbar">
+      <div class="subtabs" id="subtabs">
+        <button class="subtab active" data-view="overview">OVERVIEW</button>
+        <button class="subtab" data-view="blocks">BLOCKS</button>
+        <button class="subtab" data-view="address">ADDRESS</button>
+        <button class="subtab" data-view="ranking">RANKING</button>
+      </div>
+      <div class="range" id="range">
+        <button class="active" data-days="1">1D</button>
+        <button data-days="3">3D</button>
+        <button data-days="15">15D</button>
+      </div>
+    </div>
+
+    <!-- ============ OVERVIEW ============ -->
+    <section class="view" id="view-overview">
+      <div class="dash-grid">
+        <!-- pool share donut -->
+        <div class="dcard feature">
+          <div class="ct">◴ POOL SHARE</div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg viewBox="0 0 108 108" width="108" height="108">
+                <circle cx="54" cy="54" r="46" fill="none" stroke="rgba(233,230,221,.10)" stroke-width="9"/>
+                <circle id="donut-arc" cx="54" cy="54" r="46" fill="none" stroke="#c9a84c" stroke-width="9" stroke-dasharray="0 289"/>
+              </svg>
+              <div class="lbl"><b id="donut-pct">—</b><span id="donut-cap">SHARE ACCEPT</span></div>
+            </div>
+            <div class="donut-kv">
+              <div><div class="k">POOL OUTPUT</div><div class="v" id="d-out">—</div><div class="r" id="d-out-r">blocks accepted</div></div>
+              <div><div class="k">BLOCK REWARD</div><div class="v" id="d-reward">—</div><div class="r">PRL · current job</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- pool hashrate -->
+        <div class="dcard">
+          <div class="ct">⚡ POOL HASHRATE <span class="muted" style="letter-spacing:1px">(1D)</span></div>
+          <div class="big"><span class="soon" style="font-size:16px;letter-spacing:2px">SOON</span></div>
+          <div class="sub">awaiting live hashrate feed</div>
+          <div class="soon-spark">∿ ∿ ∿</div>
+        </div>
+
+        <!-- network hashrate -->
+        <div class="dcard">
+          <div class="ct">◇ NETWORK HASHRATE <span class="muted" style="letter-spacing:1px">(1D)</span></div>
+          <div class="big"><span class="soon" style="font-size:16px;letter-spacing:2px">SOON</span></div>
+          <div class="sub">from the Pearl network</div>
+          <div class="soon-spark">∿ ∿ ∿</div>
+        </div>
+
+        <!-- output per day -->
+        <div class="dcard feature">
+          <div class="ct">▦ OUTPUT PER P/DAY</div>
+          <div class="obars">
+            <div class="obar"><span class="k">LAST 1H</span><span class="track"><span class="fill" style="width:0"></span></span><span class="v soon">soon</span></div>
+            <div class="obar"><span class="k">LAST 8H</span><span class="track"><span class="fill" style="width:0"></span></span><span class="v soon">soon</span></div>
+            <div class="obar"><span class="k">LAST 24H</span><span class="track"><span class="fill" style="width:0"></span></span><span class="v soon">soon</span></div>
+          </div>
+          <div class="pending-row"><span class="k">◆ PENDING REWARD</span><span class="v" id="d-pending">—</span></div>
+          <div class="sub" id="d-pending-note">look up an address to see pending</div>
+        </div>
+      </div>
+
+      <!-- effort / orphan -->
+      <div class="minitiles">
+        <div class="minitile"><div><div class="k">AVG EFFORT</div><span class="x">needs live hashrate</span></div><div class="v soon" style="font-size:15px;letter-spacing:2px">SOON</div></div>
+        <div class="minitile"><div><div class="k">ORPHANED / REJECT</div><span class="x" id="oj-note">share + submission health</span></div><div class="v" id="oj-val">—</div></div>
+      </div>
+
+      <!-- trend charts -->
+      <div class="charts2">
+        <div class="chartcard">
+          <div class="ch-head"><h3>Production trend</h3>
+            <div class="legend"><span><i class="g"></i>Pool output</span><span><i class="f"></i>Shares</span></div></div>
+          <div class="chartbox"><canvas id="prodchart"></canvas><div class="chart-soon hidden" id="prod-soon"></div></div>
+        </div>
+        <div class="chartcard">
+          <div class="ch-head"><h3>Hashrate trend</h3>
+            <div class="legend"><span><i class="g"></i>Pool</span><span><i class="f"></i>Network</span><span><i class="d"></i>Difficulty</span></div></div>
+          <div class="chartbox"><canvas id="hashchart"></canvas><div class="chart-soon" id="hash-soon">Hashrate trend goes live once the pool reports a live hashrate feed.</div></div>
+        </div>
+      </div>
+
+      <!-- latest blocks -->
+      <div class="section-head" style="margin:34px 0 16px"><span class="tick">//</span><h2 style="font-size:18px">Latest blocks</h2><span class="muted" id="lb-meta" style="font-size:11px"></span></div>
+      <div id="blockgrid" class="blockgrid"><div class="empty-card">Loading…</div></div>
+    </section>
+
+    <!-- ============ BLOCKS ============ -->
+    <section class="view hidden" id="view-blocks">
+      <div class="section-head" style="margin:6px 0 16px"><span class="tick">//</span><h2 style="font-size:18px">All blocks</h2></div>
+      <div class="panel" style="padding:0;overflow-x:auto">
+        <table class="tbl"><thead><tr><th>HEIGHT</th><th>HASH</th><th>REWARD</th><th>WORKER</th><th>MINER</th><th>MATURITY</th><th>STATUS</th></tr></thead>
+        <tbody id="blocks-tbl"><tr><td colspan="7" class="loading">Loading…</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <!-- ============ ADDRESS (the edge) ============ -->
+    <section class="view hidden" id="view-address">
+      <div id="addr-empty" class="empty-card" style="margin-top:6px">Enter a <span class="gold">prl1…</span> address in the bar above to load workers, balances, payouts and your performance history.</div>
+
+      <div id="addr-body" class="hidden">
+        <div class="section-head" style="margin:2px 0 14px"><span class="tick">//</span><h2 style="font-size:18px">Miner</h2><span class="muted" id="m-addr" style="font-size:12px"></span></div>
+        <div class="grid c3" style="margin-bottom:16px">
+          <div class="card"><div class="h">BALANCE (PAID)</div><div class="big" style="font-size:25px;margin-top:10px" id="m-paid">—</div><div class="muted" style="font-size:11px">PRL · lifetime</div></div>
+          <div class="card"><div class="h">PENDING</div><div class="big gold" style="font-size:25px;margin-top:10px" id="m-pending">—</div><div class="muted" style="font-size:11px">PRL · next payout</div></div>
+          <div class="card"><div class="h">POOL SHARE</div><div class="big" style="font-size:25px;margin-top:10px" id="m-share">—</div><div class="muted" style="font-size:11px">of total pool shares</div></div>
+        </div>
+
+        <div class="grid c2">
+          <div>
+            <div class="section-head" style="margin:8px 0 14px"><span class="tick">//</span><h2 style="font-size:15px">Workers</h2></div>
+            <div class="grid c2" id="workers"></div>
+          </div>
+          <div>
+            <div class="section-head" style="margin:8px 0 14px"><span class="tick">//</span><h2 style="font-size:15px">Estimate daily</h2></div>
+            <div class="panel">
+              <div class="kv">
+                <div class="kv-row"><span>EST. BLOCKS / DAY</span><b><input id="bpd" value="144" style="width:70px;background:transparent;border:1px solid var(--line);color:var(--fg);font-family:inherit;text-align:right;padding:3px 6px"/></b></div>
+                <div class="kv-row"><span>YOUR SHARE</span><b id="pc-share">—</b></div>
+                <div class="kv-row"><span>BLOCK REWARD</span><b id="pc-reward">—</b></div>
+                <div class="kv-row"><span>POOL FEE</span><b id="pc-fee">—</b></div>
+              </div>
+              <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;display:flex;justify-content:space-between;align-items:baseline">
+                <span class="muted" style="font-size:12px">EST. DAILY</span><span class="big gold" id="pc-daily" style="font-size:26px">—</span>
+              </div>
+              <p class="muted" style="font-size:11px;margin-top:10px;line-height:1.6">Share-based estimate from your PPLNS contribution. Becomes precise once live hashrate is available.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-head" style="margin:34px 0 14px"><span class="tick">//</span><h2 style="font-size:15px">Performance history <span class="muted" style="font-size:11px">· our edge</span></h2></div>
+        <div class="chartcard"><div class="chartbox" style="height:220px"><canvas id="hist"></canvas><div class="chart-soon hidden" id="hist-empty"></div></div></div>
+        <p class="muted" style="font-size:11px;margin-top:8px;line-height:1.6">History is recorded locally each time you look up this address, so your trend builds from today. A server-side historical API will extend it back across the pool's full lifetime — the “go back in time” view no other Pearl pool offers.</p>
+      </div>
+    </section>
+
+    <!-- ============ RANKING ============ -->
+    <section class="view hidden" id="view-ranking">
+      <div class="section-head" style="margin:6px 0 16px"><span class="tick">//</span><h2 style="font-size:18px">Top miners</h2></div>
+      <div class="panel" style="padding:0;overflow-x:auto">
+        <table class="tbl"><thead><tr><th>#</th><th>ADDRESS</th><th>PAID</th><th>PENDING</th><th>HASHRATE</th></tr></thead>
+        <tbody id="board"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody></table>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer"><div class="inner">
+    <span>PEARLERPOOL.COM</span>
+    <span class="foot-links"><a href="index.html">HOME</a> · <a href="mine.html">MINE</a> · <a href="calculator.html">CALCULATOR</a> · <a href="faq.html">FAQ</a> · <a href="about.html">ABOUT</a> · <a href="terms.html">TERMS</a> · <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD</a></span>
+    <span>EST. 2026</span>
+  </div></footer>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+(function(){
+  PP.rain("rain");
+  var STATS=null, INFO=null, MINER=null, BLOCKS=[], RANGE_DAYS=1;
+  var CIRC=289; // 2*pi*46
+
+  /* ---------- view (sub-tab) switching ---------- */
+  function showView(v){
+    document.querySelectorAll("#subtabs .subtab").forEach(function(b){b.classList.toggle("active",b.dataset.view===v);});
+    document.querySelectorAll(".view").forEach(function(s){s.classList.add("hidden");});
+    document.getElementById("view-"+v).classList.remove("hidden");
+    if(v==="address"&&MINER) drawHistory();
+    if(v==="overview") drawProduction();
+  }
+  document.getElementById("subtabs").addEventListener("click",function(e){
+    var b=e.target.closest(".subtab"); if(b) showView(b.dataset.view);
+  });
+  document.getElementById("range").addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    document.querySelectorAll("#range button").forEach(function(x){x.classList.remove("active");});
+    b.classList.add("active"); RANGE_DAYS=parseInt(b.dataset.days,10); drawProduction();
+  });
+
+  /* ---------- load everything ---------- */
+  Promise.all([PP.api("/stats"),PP.api("/pool/info"),PP.api("/miners"),PP.api("/pool/blocks")]).then(function(r){
+    STATS=r[0]; INFO=r[1]; var miners=PP.topMiners(r[2]); BLOCKS=PP.blockList(r[3]);
+    recordPoolSnapshot();
+    renderOverview(miners);
+    renderBoard(miners);
+    renderBlocksTable();
+    drawProduction();
+    PP.mockNotice();
+  });
+
+  /* ---------- overview ---------- */
+  function renderOverview(miners){
+    var acc=PP.blocksFound(STATS);
+    var rej=(STATS&&STATS.stratum&&STATS.stratum.rejected)||0;
+    // donut = share acceptance health (accepted/(accepted+rejected) of stratum shares)
+    var sAcc=(STATS&&STATS.stratum&&STATS.stratum.accepted)||0;
+    var health=(sAcc+rej)?sAcc/(sAcc+rej):0;
+    setDonut(health,(health*100).toFixed(1)+"%","SHARE ACCEPT");
+    document.getElementById("d-out").textContent=PP.num(acc);
+    document.getElementById("d-out-r").textContent="blocks accepted · "+PP.num(STATS&&STATS.shares_total)+" shares";
+    document.getElementById("d-reward").textContent=PP.grainsToPRL(PP.job(STATS).reward_grains);
+    // orphan / reject
+    var subs=PP.subs(STATS), orphans=(subs.orphaned||0), subAcc=(subs.accepted||0);
+    var orphanPct=(subAcc+orphans)?orphans/(subAcc+orphans)*100:0;
+    var rejPct=(sAcc+rej)?rej/(sAcc+rej)*100:0;
+    document.getElementById("oj-val").textContent=orphanPct.toFixed(2)+"% / "+rejPct.toFixed(2)+"%";
+    document.getElementById("oj-note").textContent="orphan "+orphanPct.toFixed(2)+"% · reject "+rejPct.toFixed(2)+"%";
+    document.getElementById("lb-meta").textContent="latest height "+PP.num(PP.job(STATS).height)+" · network hashrate soon";
+    renderBlockGrid();
+  }
+  function setDonut(frac,pct,cap){
+    frac=Math.max(0,Math.min(1,frac||0));
+    document.getElementById("donut-arc").setAttribute("stroke-dasharray",(frac*CIRC).toFixed(1)+" "+CIRC);
+    document.getElementById("donut-pct").textContent=pct;
+    document.getElementById("donut-cap").textContent=cap;
+  }
+
+  function renderBlockGrid(){
+    var g=document.getElementById("blockgrid"); g.innerHTML="";
+    if(!BLOCKS.length){g.innerHTML='<div class="empty-card">No blocks found yet — be the first to surface a pearl.</div>';return;}
+    var curH=PP.job(STATS).height||0;
+    BLOCKS.slice(0,10).forEach(function(b){
+      var st=(b.submit_status||"").toUpperCase(), cls=st==="ACCEPTED"?"ok":st==="ORPHAN"?"orphan":"bad";
+      var conf=Math.max(0,Math.min(100,curH-(b.block_height||0))), matW=conf+"%";
+      var c=document.createElement("div"); c.className="blockcard";
+      c.innerHTML='<div class="top"><span class="hgt">#'+PP.num(b.block_height)+'</span><span class="badge '+cls+'">'+(st||"—")+'</span></div>'+
+        '<div class="rew">'+PP.grainsToPRL(b.block_reward)+' PRL</div>'+
+        '<div class="time">'+(b.worker_name||"—")+' · '+PP.addrShort(b.miner_address)+'</div>'+
+        '<div class="mat"><div class="mlbl"><span>MATURITY</span><span>'+conf+'/100</span></div><div class="track"><div class="fill" style="width:'+matW+'"></div></div></div>';
+      g.appendChild(c);
+    });
+  }
+
+  /* ---------- blocks table ---------- */
+  function renderBlocksTable(){
+    var tb=document.getElementById("blocks-tbl"); tb.innerHTML="";
+    if(!BLOCKS.length){tb.innerHTML="<tr><td colspan='7' class='muted'>No blocks found yet.</td></tr>";return;}
+    var curH=PP.job(STATS).height||0;
+    BLOCKS.forEach(function(b){
+      var st=(b.submit_status||"").toUpperCase(),cls=st==="ACCEPTED"?"ok":st==="ORPHAN"?"orphan":"bad";
+      var conf=Math.max(0,Math.min(100,curH-(b.block_height||0)));
+      var tr=document.createElement("tr");
+      tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td class='mono-addr'>"+(b.block_hash||"—")+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td>"+(b.worker_name||"—")+"</td><td class='mono-addr'>"+PP.addrShort(b.miner_address)+"</td><td class='muted'>"+conf+"/100</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";
+      tb.appendChild(tr);
+    });
+  }
+
+  /* ---------- ranking ---------- */
+  function renderBoard(list){
+    var tb=document.getElementById("board"); tb.innerHTML="";
+    if(!list.length){tb.innerHTML="<tr><td colspan='5' class='muted'>No miners online yet — connect one from the Mine page.</td></tr>";return;}
+    list.forEach(function(m,i){
+      var tr=document.createElement("tr"); tr.style.cursor="pointer";
+      tr.onclick=function(){document.getElementById("addr").value=m.payout_addr;lookup(m.payout_addr);};
+      tr.innerHTML="<td>"+(i+1)+"</td><td class='mono-addr'>"+PP.addrShort(m.payout_addr)+"</td><td>"+PP.grainsToPRL(m.rewards&&m.rewards.payed)+"</td><td class='gold'>"+PP.grainsToPRL(m.rewards&&m.rewards.pending)+"</td><td class='muted'>soon</td>";
+      tb.appendChild(tr);
+    });
+  }
+
+  /* ---------- pool history (production trend, our local-snapshot MVP) ---------- */
+  function recordPoolSnapshot(){
+    try{
+      var arr=JSON.parse(localStorage.getItem("pp_pool_hist")||"[]");
+      var blocks=PP.blocksFound(STATS), shares=(STATS&&STATS.shares_total)||0;
+      var last=arr[arr.length-1];
+      if(!last||Date.now()-last.t>300000){arr.push({t:Date.now(),b:blocks,s:shares});if(arr.length>500)arr.shift();
+        localStorage.setItem("pp_pool_hist",JSON.stringify(arr));}
+    }catch(e){}
+  }
+  function poolHistory(){
+    var arr=[]; try{arr=JSON.parse(localStorage.getItem("pp_pool_hist")||"[]");}catch(e){}
+    if(PP.usingMock && arr.length<3){ // seed a lively sample so the chart is reviewable offline
+      arr=[]; var now=Date.now(), b=295000, s=1.6e6;
+      for(var i=40;i>=0;i--){ b+=Math.floor(200+Math.random()*900); s+=Math.floor(2000+Math.random()*9000);
+        arr.push({t:now-i*36e5, b:b+Math.floor((Math.random()-.5)*400), s:s}); }
+    }
+    var cut=Date.now()-RANGE_DAYS*864e5;
+    var f=arr.filter(function(p){return p.t>=cut;});
+    return f.length>=2?f:arr; // if range filters everything out, show all
+  }
+  function drawProduction(){
+    var cv=document.getElementById("prodchart"), soon=document.getElementById("prod-soon");
+    var pts=poolHistory();
+    if(pts.length<2){soon.classList.remove("hidden");soon.textContent="Production trend builds as the pool runs and you check back — first points are recording now.";cv.classList.add("hidden");return;}
+    soon.classList.add("hidden"); cv.classList.remove("hidden");
+    drawMulti(cv,[
+      {pts:pts.map(function(p){return {t:p.t,v:p.b};}),color:"#c9a84c",width:1.7,fill:true},
+      {pts:pts.map(function(p){return {t:p.t,v:p.s};}),color:"rgba(114,120,132,.85)",width:1.2,fill:false}
+    ]);
+  }
+
+  /* ---------- generic multi-line chart (each series normalized to its own range) ---------- */
+  function drawMulti(cv,series){
+    var w=cv.width=cv.clientWidth, h=cv.height=cv.clientHeight, pad=22;
+    var ctx=cv.getContext("2d"); ctx.clearRect(0,0,w,h);
+    var allT=[]; series.forEach(function(s){s.pts.forEach(function(p){allT.push(p.t);});});
+    var t0=Math.min.apply(0,allT), t1=Math.max.apply(0,allT); if(t1===t0)t1=t0+1;
+    function X(t){return pad+(t-t0)/(t1-t0)*(w-pad*2);}
+    // gridlines
+    ctx.strokeStyle="rgba(233,230,221,.07)";ctx.lineWidth=1;
+    for(var g=0;g<=3;g++){var gy=pad+g/3*(h-pad*2);ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(w-pad,gy);ctx.stroke();}
+    series.forEach(function(s){
+      var ys=s.pts.map(function(p){return p.v;}); var y0=Math.min.apply(0,ys),y1=Math.max.apply(0,ys); if(y1===y0)y1=y0+1;
+      function Y(v){return h-pad-(v-y0)/(y1-y0)*(h-pad*2);}
+      if(s.fill){
+        var grad=ctx.createLinearGradient(0,pad,0,h-pad);grad.addColorStop(0,"rgba(201,168,76,.20)");grad.addColorStop(1,"rgba(201,168,76,0)");
+        ctx.beginPath();ctx.moveTo(X(s.pts[0].t),Y(s.pts[0].v));s.pts.forEach(function(p){ctx.lineTo(X(p.t),Y(p.v));});
+        ctx.lineTo(X(s.pts[s.pts.length-1].t),h-pad);ctx.lineTo(X(s.pts[0].t),h-pad);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+      }
+      ctx.beginPath();ctx.moveTo(X(s.pts[0].t),Y(s.pts[0].v));s.pts.forEach(function(p){ctx.lineTo(X(p.t),Y(p.v));});
+      ctx.strokeStyle=s.color;ctx.lineWidth=s.width;ctx.stroke();
+      if(s.fill){var lp=s.pts[s.pts.length-1];ctx.fillStyle="#fff3d0";ctx.beginPath();ctx.arc(X(lp.t),Y(lp.v),3,0,6.29);ctx.fill();}
+    });
+  }
+
+  /* ---------- address lookup (the edge) ---------- */
+  function feeFraction(){var p=PP.feePct(INFO);return p!=null?p/100:0.01;}
+  function lookup(addr){
+    addr=(addr||document.getElementById("addr").value||"").trim(); if(!addr) return;
+    showView("address");
+    document.getElementById("addr-empty").classList.add("hidden");
+    document.getElementById("addr-body").classList.remove("hidden");
+    Promise.all([PP.api("/miners/"+encodeURIComponent(addr)),PP.api("/miners")]).then(function(r){
+      var m=r[0]||{}, top=PP.topMiners(r[1]);
+      var rewards=m.rewards || (top.filter(function(x){return x.payout_addr===addr;})[0]||{}).rewards || {payed:0,pending:0};
+      MINER={addr:addr,workers:m.workers||[],rewards:rewards};
+      renderMiner();
+    });
+  }
+  function renderMiner(){
+    document.getElementById("m-addr").textContent=PP.addrShort(MINER.addr);
+    document.getElementById("m-paid").textContent=PP.grainsToPRL(MINER.rewards.payed);
+    document.getElementById("m-pending").textContent=PP.grainsToPRL(MINER.rewards.pending);
+    // mirror pending into the overview card too
+    document.getElementById("d-pending").textContent=PP.grainsToPRL(MINER.rewards.pending)+" PRL";
+    document.getElementById("d-pending-note").textContent="for "+PP.addrShort(MINER.addr);
+    var yourShares=MINER.workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0);
+    var poolShares=(STATS&&STATS.shares_total)||0;
+    var share=poolShares?yourShares/poolShares:0;
+    document.getElementById("m-share").textContent=(share*100).toFixed(share*100<1?3:2)+"%";
+    var wc=document.getElementById("workers"); wc.innerHTML="";
+    if(!MINER.workers.length)wc.innerHTML="<p class='muted' style='font-size:13px'>No workers reporting for this address yet.</p>";
+    MINER.workers.forEach(function(w){
+      var c=document.createElement("div"); c.className="card";
+      c.innerHTML="<div class='h'>"+(w.name||"worker")+"<span class='badge ok'>ONLINE</span></div><div class='kv'><div class='kv-row'><span>SHARES</span><b>"+PP.num(w.shares)+"</b></div><div class='kv-row'><span>LAST SHARE</span><b>"+PP.ago(w.last_share)+"</b></div><div class='kv-row'><span>HASHRATE</span><b class='muted'>soon</b></div></div>";
+      wc.appendChild(c);
+    });
+    profit(share); drawHistory();
+  }
+  function profit(share){
+    var bpd=parseFloat(document.getElementById("bpd").value)||0;
+    var rew=PP.rewardPRL(STATS), fee=feeFraction(), daily=share*bpd*rew*(1-fee);
+    document.getElementById("pc-share").textContent=(share*100).toFixed(3)+"%";
+    document.getElementById("pc-reward").textContent=rew.toLocaleString("en-US",{maximumFractionDigits:2})+" PRL";
+    document.getElementById("pc-fee").textContent=(fee*100)+"%";
+    document.getElementById("pc-daily").textContent=daily.toLocaleString("en-US",{maximumFractionDigits:3})+" PRL";
+  }
+  document.getElementById("bpd").addEventListener("input",function(){
+    if(!MINER)return; var ys=MINER.workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0);
+    var ps=(STATS&&STATS.shares_total)||0; profit(ps?ys/ps:0);
+  });
+
+  function drawHistory(){
+    if(!MINER)return;
+    var key="pp_hist_"+MINER.addr, arr=[]; try{arr=JSON.parse(localStorage.getItem(key)||"[]");}catch(e){}
+    var total=(Number(MINER.rewards.payed)||0)+(Number(MINER.rewards.pending)||0), last=arr[arr.length-1];
+    if(!last||Date.now()-last.t>60000){arr.push({t:Date.now(),v:total});if(arr.length>300)arr.shift();
+      try{localStorage.setItem(key,JSON.stringify(arr));}catch(e){}}
+    var pts=arr.map(function(p){return {t:p.t,v:p.v/PP.GRAINS_PER_PRL};});
+    var cv=document.getElementById("hist"), empty=document.getElementById("hist-empty");
+    if(pts.length<2){empty.classList.remove("hidden");empty.textContent="History begins now — look this address up again over the coming days to watch your trend build.";cv.classList.add("hidden");return;}
+    empty.classList.add("hidden");cv.classList.remove("hidden");
+    drawMulti(cv,[{pts:pts,color:"#c9a84c",width:1.7,fill:true}]);
+  }
+
+  document.getElementById("go").onclick=function(){lookup();};
+  document.getElementById("addr").addEventListener("keydown",function(e){if(e.key==="Enter")lookup();});
+  if(location.hash.length>4){var a=decodeURIComponent(location.hash.slice(1));document.getElementById("addr").value=a;lookup(a);}
+  addEventListener("resize",function(){drawProduction();if(MINER)drawHistory();});
+})();
+</script>
+</body>
+</html>

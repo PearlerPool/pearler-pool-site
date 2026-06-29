@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pearler Pool — a pool for hunters, for pearlers</title>
+<meta name="description" content="Pearler Pool — the first cult for pearl hunters. Mine Pearl (PRL) with PPLNS rewards: bring your own gear or deploy our miner in one command." />
+<meta name="theme-color" content="#07090e" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Pearler Pool — a pool for hunters, for pearlers" />
+<meta property="og:description" content="Mine Pearl (PRL) with PPLNS rewards. Bring your own gear or use our miner — let's hunt some PRLs together." />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307090e'/%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c9a84c'/%3E%3Ccircle cx='12.5' cy='12.5' r='3' fill='%23fff3d0'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<canvas id="rain"></canvas>
+<div class="page">
+  <nav class="nav"><div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>PEARLER POOL</a>
+    <div class="nav-links">
+      <a href="index.html" class="active">HOME</a>
+      <a href="mine.html">MINE</a>
+      <a href="dashboard.html">DASHBOARD</a>
+      <a href="faq.html">FAQ</a>
+      <a class="discord" href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD ↗</a>
+    </div>
+  </div></nav>
+
+  <header class="container hero">
+    <p class="kicker">// PEARL <b>(PRL)</b> · POOL MINING · PPLNS</p>
+    <h1>A pool for hunters, for pearlers.</h1>
+    <p>Come with your own gear or use our miner — let's hunt some PRLs together.</p>
+    <div class="cta">
+      <a class="btn gold" href="mine.html">START MINING →</a>
+      <a class="btn" href="dashboard.html">OPEN DASHBOARD</a>
+    </div>
+  </header>
+
+  <section class="container" style="padding-bottom:8px">
+    <div class="statbar" id="statbar">
+      <div class="stat"><div class="lbl">BLOCKS FOUND</div><div class="val" id="s-blocks">—</div></div>
+      <div class="stat"><div class="lbl">ACTIVE MINERS</div><div class="val" id="s-miners">—</div></div>
+      <div class="stat"><div class="lbl">TOTAL SHARES</div><div class="val" id="s-shares">—</div></div>
+      <div class="stat"><div class="lbl">CURRENT HEIGHT</div><div class="val" id="s-height">—</div></div>
+      <div class="stat"><div class="lbl">POOL FEE</div><div class="val" id="s-fee">—</div></div>
+      <div class="stat"><div class="lbl">NETWORK HASHRATE</div><div class="val"><span class="soon">SOON</span></div></div>
+    </div>
+  </section>
+
+  <section class="section"><div class="container">
+    <div class="section-head"><span class="tick">//</span><h2>Latest blocks</h2></div>
+    <div class="panel" style="padding:0;overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>HEIGHT</th><th>REWARD</th><th>WORKER</th><th>MINER</th><th>STATUS</th></tr></thead>
+        <tbody id="blocks"><tr><td colspan="5" class="loading">Loading blocks…</td></tr></tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px"><a class="muted" href="dashboard.html">VIEW ALL ON DASHBOARD →</a></p>
+  </div></section>
+
+  <footer class="footer"><div class="inner">
+    <span>PEARLERPOOL.COM</span>
+    <span class="foot-links"><a href="mine.html">MINE</a> · <a href="dashboard.html">DASHBOARD</a> · <a href="calculator.html">CALCULATOR</a> · <a href="faq.html">FAQ</a> · <a href="about.html">ABOUT</a> · <a href="terms.html">TERMS</a> · <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD</a></span>
+    <span>EST. 2026</span>
+  </div></footer>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+(function(){
+  PP.rain("rain");
+  Promise.all([PP.api("/stats"), PP.api("/pool/info"), PP.api("/miners"), PP.api("/pool/blocks")])
+  .then(function(res){
+    var stats=res[0], info=res[1], miners=res[2], blocks=res[3];
+    if(stats){
+      PP.countUp(document.getElementById("s-blocks"), PP.blocksFound(stats));
+      PP.countUp(document.getElementById("s-shares"), stats.shares_total||0);
+      PP.countUp(document.getElementById("s-height"), PP.job(stats).height||0);
+      var sessions=PP.activeMiners(stats);
+      var minerCount=PP.topMiners(miners).length;
+      PP.countUp(document.getElementById("s-miners"), sessions||minerCount);
+    }
+    var fee=PP.feePct(info); document.getElementById("s-fee").textContent=(fee!=null?fee+"%":"—");
+    var tb=document.getElementById("blocks"), blist=PP.blockList(blocks); tb.innerHTML="";
+    if(!blist.length){tb.innerHTML="<tr><td colspan='5' class='muted'>No blocks found yet.</td></tr>";}
+    blist.slice(0,6).forEach(function(b){
+      var st=(b.submit_status||"").toUpperCase();
+      var cls=st==="ACCEPTED"?"ok":st==="ORPHAN"?"orphan":"bad";
+      var tr=document.createElement("tr");
+      tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td>"+(b.worker_name||"—")+"</td><td class='mono-addr'>"+PP.addrShort(b.miner_address)+"</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";
+      tb.appendChild(tr);
+    });
+    PP.mockNotice();
+  });
+})();
+</script>
+</body>
+</html>

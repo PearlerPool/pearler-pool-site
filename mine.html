@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mine — Pearler Pool</title>
+<meta name="description" content="Start mining Pearl (PRL) with Pearler Pool — four clearly-priced ways in, with one-command Docker and AI deploy prompts for Claude and Codex." />
+<meta name="theme-color" content="#07090e" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Mine — Pearler Pool" />
+<meta property="og:description" content="Four ways to mine Pearl (PRL): our miner, open-source, official, or connect your own. Paste a prompt into Claude or Codex to auto-deploy." />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307090e'/%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c9a84c'/%3E%3Ccircle cx='12.5' cy='12.5' r='3' fill='%23fff3d0'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+<canvas id="rain"></canvas>
+<div class="page">
+  <nav class="nav"><div class="inner">
+    <a class="brand" href="index.html"><span class="dot"></span>PEARLER POOL</a>
+    <div class="nav-links">
+      <a href="index.html">HOME</a>
+      <a href="mine.html" class="active">MINE</a>
+      <a href="dashboard.html">DASHBOARD</a>
+      <a href="faq.html">FAQ</a>
+      <a class="discord" href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD ↗</a>
+    </div>
+  </div></nav>
+
+  <header class="container hero" style="padding-bottom:26px">
+    <p class="kicker">// START MINING</p>
+    <h1>Four ways to join the hunt.</h1>
+    <p>No solo mining — pooled <span class="gold">PPLNS</span> only. Use our miner, an open-source build, the official miner, or point your own rig at the pool. Paste your <span class="gold">prl1…</span> address once and every command and prompt below is personalised to you.</p>
+    <div class="lookup" style="margin-top:26px;max-width:560px">
+      <input id="addr" placeholder="your prl1… payout address (optional)" spellcheck="false" />
+      <button id="addr-apply">APPLY</button>
+    </div>
+    <p class="muted" style="font-size:11.5px;margin-top:12px;letter-spacing:.5px">Base pool network fee is <span class="gold">1%</span> (live from /pool/info) — it applies to every option below.</p>
+  </header>
+
+  <!-- THE FOUR OPTIONS -->
+  <section class="section" id="options"><div class="container">
+    <div class="section-head"><span class="tick">//</span><h2>Choose how you mine</h2></div>
+    <div class="tabs" id="opt-tabs">
+      <button class="tab active" data-pane="pearler">01 · OUR MINER<span class="r">★ RECOMMENDED · 2% FEE</span></button>
+      <button class="tab" data-pane="akoya">02 · AKOYA MINER<span class="r">OPEN SOURCE · 0% FEE</span></button>
+      <button class="tab" data-pane="official">03 · PERL OFFICIAL<span class="r">STANDARD · 0% FEE</span></button>
+      <button class="tab" data-pane="connect">04 · CONNECT YOUR OWN<span class="r">ANY MINER · 0% FEE</span></button>
+    </div>
+    <div id="panes"></div>
+  </div></section>
+
+  <footer class="footer"><div class="inner">
+    <span>PEARLERPOOL.COM</span>
+    <span class="foot-links"><a href="index.html">HOME</a> · <a href="dashboard.html">DASHBOARD</a> · <a href="calculator.html">CALCULATOR</a> · <a href="faq.html">FAQ</a> · <a href="about.html">ABOUT</a> · <a href="terms.html">TERMS</a> · <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD</a></span>
+    <span>EST. 2026</span>
+  </div></footer>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+(function(){
+  PP.rain("rain");
+  var ADDR="YOUR_PRL_ADDRESS", INFO=null;
+
+  // fee line shown prominently on each option
+  function feeBlock(n,note){
+    return '<div class="fee-callout"><span class="n">'+n+'</span><span class="t">'+note+'</span></div>';
+  }
+
+  // one deploy spec → a complete, self-contained agent prompt.
+  // Designed to work identically in Claude Code, Claude in Cowork, or OpenAI Codex.
+  function agentPrompt(tool,opt,s){
+    var who = tool==="codex"
+      ? "You are OpenAI Codex (CLI) with shell access."
+      : "You are an AI coding agent with shell access (Claude Code, or Claude in Cowork).";
+    var noAddr = (ADDR==="YOUR_PRL_ADDRESS");
+    var lines = [
+      who+" You will set up GPU crypto mining for me. Work autonomously and figure things out yourself; only pause to ask me before anything that needs my password / sudo / admin rights or that could be destructive. Don't declare success until the miner is actually submitting accepted shares — or until you hit a blocker you can't solve, which you then explain plainly.",
+      "",
+      "FIRST — CHECK YOU CAN ACTUALLY MINE HERE (important): mining must run on MY real computer with MY GPU. If you are in a sandboxed or hosted environment — e.g. Claude in Cowork's Linux sandbox, a CI runner, or a remote container — then `nvidia-smi` will find no GPU and/or `docker info` will fail and/or you can otherwise tell you are NOT on my physical machine. In that case do NOT try to mine in the sandbox (it has no GPU and is wiped when the session ends). Instead: fill the command in step 4 with my details, print it plus a short numbered list of how I run it on my own machine, and stop. Never fake a deploy in a sandbox.",
+      "",
+      "GOAL: deploy a Pearl (PRL) miner with Docker using "+opt.miner+", connect it to Pearler Pool, get it submitting ACCEPTED shares, then verify it pool-side and report back.",
+      "",
+      "WHAT PEARLER POOL IS: a PPLNS mining pool for the Pearl (PRL) coin (proof-of-useful-work). I earn PRL proportional to the valid shares my miner submits. Pool fee is 1%.",
+      "",
+      "POOL CONNECTION — already filled in for me; use exactly:",
+      "- Stratum host: "+s.host+"   (the ports below are RAW TCP stratum, NOT web addresses — don't curl or open them in a browser)",
+      "- Port (TLS, preferred): "+s.port_tls,
+      "- Port (plain, fallback): "+s.port_plain,
+      "- Protocol: "+s.protocol,
+      "- Log in to the pool as username: "+ADDR+".<worker>  with password: x   (my payout address, a dot, then a worker name)",
+      "- My PRL payout address (public — safe to use, it is NOT a secret): "+ADDR,
+      "- Dashboard to verify when done: https://pearlerpool.com  (open the Dashboard and look up my address)",
+      (noAddr ? "  ACTION REQUIRED: the address above is still the placeholder YOUR_PRL_ADDRESS. Ask me for my real prl1… payout address (or I can paste this prompt again after entering it in the address box on the Mine page) before you run anything." : null),
+      "",
+      "STEPS:",
+      "1. ENVIRONMENT: detect my OS, CPU architecture and GPU (`nvidia-smi`, then `rocminfo` for AMD); give me a one-line summary. Notes: Linux + NVIDIA is the supported path. On Windows, use Docker Desktop with the WSL2 backend — there is no `sudo`, so put the run command on ONE line and replace `$(hostname)` with a name you pick. On macOS, Docker's `--gpus` flag is unsupported, so GPU mining with this image likely won't work — tell me that before going further.",
+      "2. DOCKER: ensure Docker is installed and the daemon is running (`docker info`). If it's missing, install Docker for my OS (ask before any sudo). If I have an NVIDIA GPU, make sure the NVIDIA Container Toolkit is set up so `--gpus all` works; if it can't be made to work, fall back to CPU mining and tell me.",
+      "3. VALIDATE INPUTS: confirm my payout address looks real — it should start with `prl1`, be ~50+ characters, and contain no `...`; if it's still a placeholder or looks invalid, STOP and ask me for it. Pick a worker name: lowercase letters/digits/dashes only, max 32 chars, derived from the hostname (strip dots and any other characters).",
+      "4. IMAGE CHECK + RUN: first `docker pull` the image named in the command below to confirm it's published. If the pull fails because the image name isn't real yet, STOP and ask me to paste the confirmed Pearler Pool image name — do NOT substitute a different or random image, and do NOT invent one. Then start it as a background, auto-restarting container over TLS:",
+      "     "+opt.runline(s),
+      "   The miner must authenticate to the pool as `"+ADDR+".<worker>` / password `x`. The settings above encode that for this image; if this particular build instead wants a stratum URL, use `stratum+ssl://"+s.host+":"+s.port_tls+"` (TLS) or `stratum+tcp://"+s.host+":"+s.port_plain+"` (plain) with that same username and password.",
+      "5. CONFIRM SHARES: check `docker logs --tail 80 "+opt.logname+"` and re-check every ~10 seconds for up to ~3 minutes (do NOT use `docker logs -f` — it blocks and you'll hang). Success = the worker is authorized/subscribed AND you see at least one accepted share (look for `accepted`, `authorized`, `result: true` or similar). If you see TLS/auth errors, retry on the plain port "+s.port_plain+". If you hit ~5 consecutive auth failures, `docker stop` the container and report back — do not leave it restart-looping with bad settings.",
+      "6. VERIFY POOL-SIDE: have me open https://pearlerpool.com → Dashboard → look up "+ADDR+", and confirm my worker shows up there.",
+      "",
+      "WHEN DONE, report back to me:",
+      "- the worker name and container name you used, whether it's on TLS or plain, and GPU or CPU",
+      "- a log line that proves shares are being accepted",
+      "- the exact commands to check status, view logs, stop, restart, and update the miner",
+      "- a one-line reminder that mining runs my GPU continuously and uses real electricity",
+      "",
+      "RULES:",
+      "- Never print, store, or transmit any private key or wallet seed. The payout address above is public and is the only credential you need.",
+      "- Don't change unrelated system settings, open inbound ports, or run any other workload.",
+      "- Anything needing sudo/admin or that could be destructive: ask me first, explain why, then proceed once I confirm."
+    ];
+    return lines.filter(function(l){return l!==null;}).join("\n");
+  }
+
+  var OPTIONS={
+    pearler:{
+      type:"docker",
+      fee:"2% fee",
+      feeNote:"PEARLER MINER FEE · PLUS 1% POOL NETWORK FEE",
+      title:"Our custom miner, tuned for Pearler Pool and the easiest way in. Recommended for most hunters.",
+      miner:"the Pearler Pool miner",
+      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name pearler-miner \\\n  -e POOL_HOST="+s.host+" \\\n  -e POOL_PORT="+s.port_tls+" -e POOL_TLS=1 \\\n  -e WALLET="+ADDR+" \\\n  -e WORKER=$(hostname) \\\n  registry.pearlerpool.com/pearler-miner:latest";},
+      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name pearler-miner \\\n     -e POOL_HOST="+s.host+" -e POOL_PORT="+s.port_tls+" -e POOL_TLS=1 \\\n     -e WALLET="+ADDR+" -e WORKER=$(hostname) \\\n     registry.pearlerpool.com/pearler-miner:latest";},
+      logname:"pearler-miner"
+    },
+    akoya:{
+      type:"docker",
+      fee:"0% fee",
+      feeNote:"OPEN SOURCE · ONLY THE 1% POOL NETWORK FEE",
+      title:"The open-source Akoya miner — for hunters who want to read and verify the source. No extra miner fee.",
+      miner:"the open-source Akoya miner pointed at Pearler Pool",
+      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name akoya-miner \\\n  -e AKOYA_POOL_HOST="+s.host+" \\\n  -e AKOYA_POOL_PORT="+s.port_tls+" -e AKOYA_POOL_TLS=1 \\\n  -e AKOYA_POOL_WALLET="+ADDR+" \\\n  -e AKOYA_POOL_WORKER=$(hostname) \\\n  registry.akoyapool.com/akoya-miner:latest";},
+      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name akoya-miner \\\n     -e AKOYA_POOL_HOST="+s.host+" -e AKOYA_POOL_PORT="+s.port_tls+" -e AKOYA_POOL_TLS=1 \\\n     -e AKOYA_POOL_WALLET="+ADDR+" -e AKOYA_POOL_WORKER=$(hostname) \\\n     registry.akoyapool.com/akoya-miner:latest";},
+      logname:"akoya-miner"
+    },
+    official:{
+      type:"docker",
+      fee:"0% fee",
+      feeNote:"STANDARD BUILD · ONLY THE 1% POOL NETWORK FEE",
+      title:"The official Perl reference miner — the standard build, no extra miner fee.",
+      miner:"the official Perl miner, pointed at Pearler Pool",
+      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name perl-miner \\\n  ghcr.io/pearl/miner:latest \\\n  --pool stratum+ssl://"+s.host+":"+s.port_tls+" \\\n  --user "+ADDR+".$(hostname) --pass x";},
+      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name perl-miner \\\n     ghcr.io/pearl/miner:latest \\\n     --pool stratum+ssl://"+s.host+":"+s.port_tls+" --user "+ADDR+".$(hostname) --pass x";},
+      logname:"perl-miner"
+    },
+    connect:{
+      type:"connect",
+      fee:"0% fee",
+      feeNote:"BRING YOUR OWN MINER · ONLY THE 1% POOL NETWORK FEE",
+      title:"Already have a miner? Point it straight at the pool — no Docker, no extra fee. TLS is recommended.",
+      cmd:function(s){return "# Point any compatible miner at Pearler Pool\nURL  (TLS)  : stratum+ssl://"+s.host+":"+s.port_tls+"   # recommended\nURL  (plain): stratum+tcp://"+s.host+":"+s.port_plain+"\nUSER        : "+ADDR+".<WORKER_NAME>\nPASS        : x\nPROTOCOL    : "+s.protocol;}
+    }
+  };
+
+  function renderPanes(){
+    var s=INFO.stratum, host=document.getElementById("panes"); host.innerHTML="";
+    Object.keys(OPTIONS).forEach(function(key,i){
+      var d=OPTIONS[key], pane=document.createElement("div");
+      pane.className="pane"+(i===0?" active":""); pane.id="pane-"+key;
+      var html=feeBlock(d.fee,d.feeNote)+
+        '<p class="muted" style="font-size:13px;line-height:1.9;margin-bottom:8px">'+d.title+'</p>';
+
+      if(d.type==="docker"){
+        html+='<div class="codeblock"><button class="copy" data-text="cmd-'+key+'">COPY</button><pre id="cmd-'+key+'"></pre></div>'+
+          '<p class="muted" style="font-size:11.5px;margin:14px 0 4px;letter-spacing:.5px">Or let an AI agent do the whole setup — copy a prompt and paste it into <span class="gold">Claude Code</span>, <span class="gold">Claude in Cowork</span>, or <span class="gold">OpenAI Codex</span>. Each prompt is self-contained: it carries all the pool settings and tells the agent exactly what to do.</p>'+
+          '<div class="prompt-row">'+
+            '<div class="codeblock prompt"><span class="tag">CLAUDE PROMPT</span><button class="copy" data-text="prc-'+key+'">COPY PROMPT</button><pre id="prc-'+key+'"></pre></div>'+
+            '<div class="codeblock prompt codex"><span class="tag">CODEX PROMPT</span><button class="copy" data-text="prx-'+key+'">COPY PROMPT</button><pre id="prx-'+key+'"></pre></div>'+
+          '</div>'+
+          '<p class="muted" style="font-size:11.5px;margin-top:10px;letter-spacing:.3px">The agent checks your GPU/Docker, verifies the image, runs the container over TLS, tails the logs until shares are accepted, self-fixes failures, then reports back and shows you on the dashboard. Docker image names are placeholders until the pool operator confirms the real builds — the prompt detects this and asks you for the confirmed name rather than failing silently.</p>';
+      } else { // connect
+        html+='<div class="grid c2" style="align-items:start">'+
+            '<div class="panel"><div class="card kv" style="border:none;background:none;padding:0">'+
+              '<div class="kv-row"><span>STRATUM HOST</span><b>'+s.host+'</b></div>'+
+              '<div class="kv-row"><span>PORT · PLAIN</span><b>'+s.port_plain+'</b></div>'+
+              '<div class="kv-row"><span>PORT · TLS (recommended)</span><b>'+s.port_tls+'</b></div>'+
+              '<div class="kv-row"><span>PROTOCOL</span><b>'+s.protocol+'</b></div>'+
+              '<div class="kv-row"><span>POOL FEE</span><b id="c-fee">—</b></div>'+
+              '<div class="kv-row"><span>PAYOUT SCHEME</span><b id="c-scheme">—</b></div>'+
+            '</div></div>'+
+            '<div>'+
+              '<div class="codeblock"><button class="copy" data-text="cmd-'+key+'">COPY</button><pre id="cmd-'+key+'"></pre></div>'+
+              '<ul class="steps">'+
+                '<li>Open your miner’s config and add a new pool / stratum URL.</li>'+
+                '<li>Set the URL to <b>stratum+ssl://'+s.host+':'+s.port_tls+'</b> (TLS) or <b>stratum+tcp://'+s.host+':'+s.port_plain+'</b> (plain).</li>'+
+                '<li>Set the <b>username</b> to <span class="gold">'+ADDR+'</span><b>.&lt;worker&gt;</b> — your prl1 address, a dot, then any worker name.</li>'+
+                '<li>Set the <b>password</b> to <b>x</b> and save.</li>'+
+                '<li>Start the miner and confirm it on the <a class="gold" href="dashboard.html">dashboard</a> once shares come in.</li>'+
+              '</ul>'+
+            '</div>'+
+          '</div>';
+      }
+      pane.innerHTML=html;
+      host.appendChild(pane);
+      pane.querySelector("#cmd-"+key).textContent=d.cmd(s);
+      if(d.type==="docker"){
+        pane.querySelector("#prc-"+key).textContent=agentPrompt("claude",d,s);
+        pane.querySelector("#prx-"+key).textContent=agentPrompt("codex",d,s);
+      }
+      if(d.type==="connect"){
+        var f=PP.feePct(INFO); pane.querySelector("#c-fee").textContent=(f!=null?f+"%":"—");
+        pane.querySelector("#c-scheme").textContent=(INFO.economics&&INFO.economics.payout_scheme)||"—";
+      }
+    });
+    bindCopies();
+  }
+
+  function bindCopies(){
+    document.querySelectorAll(".copy").forEach(function(btn){
+      btn.onclick=function(){ PP.copy(document.getElementById(btn.dataset.text).textContent, btn); };
+    });
+  }
+
+  document.getElementById("opt-tabs").addEventListener("click",function(e){
+    var t=e.target.closest(".tab"); if(!t) return;
+    document.querySelectorAll("#opt-tabs .tab").forEach(function(x){x.classList.remove("active");});
+    document.querySelectorAll("#panes .pane").forEach(function(x){x.classList.remove("active");});
+    t.classList.add("active"); document.getElementById("pane-"+t.dataset.pane).classList.add("active");
+  });
+
+  function applyAddr(){
+    var v=document.getElementById("addr").value.trim(); ADDR=v||"YOUR_PRL_ADDRESS";
+    // keep the currently active tab active across re-render
+    var active=document.querySelector("#opt-tabs .tab.active");
+    var key=active?active.dataset.pane:"pearler";
+    if(INFO){ renderPanes();
+      document.querySelectorAll("#panes .pane").forEach(function(x){x.classList.remove("active");});
+      document.getElementById("pane-"+key).classList.add("active");
+    }
+  }
+  document.getElementById("addr-apply").onclick=applyAddr;
+  document.getElementById("addr").addEventListener("keydown",function(e){if(e.key==="Enter")applyAddr();});
+
+  PP.api("/pool/info").then(function(info){ INFO=info; renderPanes(); PP.mockNotice(); });
+})();
+</script>
+</body>
+</html>
