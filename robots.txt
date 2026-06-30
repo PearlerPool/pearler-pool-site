@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# AI / generative engine crawlers welcome
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://pearlerpool.com/sitemap.xml
