@@ -71,9 +71,9 @@
         <div class="field">
           <label>NETWORK GROWTH <span class="muted" style="letter-spacing:0;text-transform:none">— monthly projection only</span></label>
           <select id="growth" style="width:100%;background:var(--surface-1);border:1px solid var(--line);color:var(--fg);font-family:inherit;font-size:16.5px;padding:12px 14px;outline:none">
-            <option value="0">Frozen — difficulty unchanged</option>
+            <option value="0" selected>Frozen — difficulty unchanged</option>
             <option value="0.05">Conservative — +5% / week</option>
-            <option value="0.10" selected>Moderate — +10% / week</option>
+            <option value="0.10">Moderate — +10% / week</option>
             <option value="0.20">Aggressive — +20% / week</option>
           </select>
         </div>
@@ -97,7 +97,7 @@
         <div class="row"><span>USD / week</span><b id="o-usd-week">—</b></div>
         <div class="row"><span>USD / month</span><b id="o-usd-month">—</b></div>
         <div class="row"><span>POOL FEE</span><b id="o-fee">—</b></div>
-        <p class="muted" style="font-size:13px;line-height:1.7;margin-top:14px">Daily uses the current block reward; weekly and monthly step through the emission curve, and the monthly view compounds your chosen network growth (reward dilution). Mining is probabilistic — real payouts vary with luck and difficulty. Not financial advice; see <a class="gold" href="terms.html">Terms</a>.</p>
+        <p class="muted" style="font-size:13px;line-height:1.7;margin-top:14px"><b style="color:var(--fg)">Estimates only, as-is with no guarantee of accuracy — Pearler Pool is not liable for decisions made from these figures.</b> Day/week/month assume stable difficulty unless you pick a network-growth scenario, which then steps the emission curve and compounds dilution. Mining is probabilistic; real payouts vary with luck, difficulty, price and hardware. Not financial advice — see <a class="gold" href="terms.html">Terms</a>.</p>
       </div>
     </div>
 
@@ -170,10 +170,9 @@
       var netEHd=netEH*Math.pow(1+g, d/7);      // network grows per chosen scenario
       return share(netEHd)*minted*luck*(1-FEE);
     }
-    var prlDay=dayYield(0);
-    var prlWeek=0, prlMonth=0, d;
-    for(d=0; d<7;  d++) prlWeek  += dayYield(d);
-    for(d=0; d<30; d++) prlMonth += dayYield(d);
+    var prlDay=dayYield(0), prlWeek, prlMonth, d;
+    if(g===0){ prlWeek=prlDay*7; prlMonth=prlDay*30; }            // stable difficulty: straight projection (matches other calculators)
+    else { prlWeek=0; prlMonth=0; for(d=0;d<7;d++) prlWeek+=dayYield(d); for(d=0;d<30;d++) prlMonth+=dayYield(d); }
 
     var sh=share(netEH);
     document.getElementById("o-share").textContent=(sh>0&&sh*100<0.001)?(sh*100).toExponential(2)+"%":(sh*100).toFixed(5)+"%";

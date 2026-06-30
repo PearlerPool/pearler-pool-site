@@ -103,6 +103,7 @@
   function num(n) { if (n == null || isNaN(n)) return "—"; return Number(n).toLocaleString("en-US"); }
   function grainsToPRL(g) { if (g == null || isNaN(g)) return "—"; var v = Number(g) / GRAINS_PER_PRL; return v.toLocaleString("en-US", { maximumFractionDigits: v < 1 ? 6 : 2 }); }
   function addrShort(a) { if (!a) return "—"; return a.length > 16 ? a.slice(0, 8) + "…" + a.slice(-6) : a; }
+  function wname(n) { if (!n) return "—"; n = String(n); return n.length > 22 ? n.slice(0, 12) + "…" + n.slice(-6) : n; }
   function ago(ts) { if (!ts) return "—"; var t = typeof ts === "string" ? Date.parse(ts) : Number(ts); if (isNaN(t)) return "—"; var s = Math.max(0, Math.floor((Date.now() - t) / 1000)); if (s < 60) return s + "s ago"; if (s < 3600) return Math.floor(s / 60) + "m ago"; if (s < 86400) return Math.floor(s / 3600) + "h ago"; return Math.floor(s / 86400) + "d ago"; }
 
   /* ---------- ui helpers ---------- */
@@ -132,7 +133,7 @@
 
   PP.api = api; PP.job = job; PP.subs = subs; PP.blocksFound = blocksFound; PP.activeMiners = activeMiners;
   PP.feePct = feePct; PP.rewardPRL = rewardPRL; PP.topMiners = topMiners; PP.blockList = blockList; PP.workerList = workerList;
-  PP.num = num; PP.grainsToPRL = grainsToPRL; PP.addrShort = addrShort; PP.ago = ago;
+  PP.num = num; PP.grainsToPRL = grainsToPRL; PP.addrShort = addrShort; PP.wname = wname; PP.ago = ago;
   PP.countUp = countUp; PP.copy = copy; PP.mockNotice = mockNotice; PP.rain = rain; PP.netApi = netApi;
 
   /* ---------- dark / light theme toggle ---------- */

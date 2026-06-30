@@ -270,7 +270,7 @@
       var c=document.createElement("div"); c.className="blockcard";
       c.innerHTML='<div class="top"><span class="hgt">#'+PP.num(b.block_height)+'</span><span class="badge '+cls+'">'+(st||"—")+'</span></div>'+
         '<div class="rew">'+PP.grainsToPRL(b.block_reward)+' PRL</div>'+
-        '<div class="time">'+(b.worker_name||"—")+' · '+PP.addrShort(b.miner_address)+'</div>'+
+        '<div class="time">'+PP.wname(b.worker_name)+' · '+PP.addrShort(b.miner_address)+'</div>'+
         '<div class="mat"><div class="mlbl"><span>MATURITY</span><span>'+conf+'/100</span></div><div class="track"><div class="fill" style="width:'+matW+'"></div></div></div>';
       g.appendChild(c);
     });
@@ -285,7 +285,7 @@
       var st=(b.submit_status||"").toUpperCase(),cls=st==="ACCEPTED"?"ok":st==="ORPHAN"?"orphan":"bad";
       var conf=Math.max(0,Math.min(100,curH-(b.block_height||0)));
       var tr=document.createElement("tr");
-      tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td class='mono-addr'>"+(b.block_hash||"—")+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td>"+(b.worker_name||"—")+"</td><td class='mono-addr'>"+PP.addrShort(b.miner_address)+"</td><td class='muted'>"+conf+"/100</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";
+      tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td class='mono-addr'>"+(b.block_hash||"—")+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td>"+PP.wname(b.worker_name)+"</td><td class='mono-addr'>"+PP.addrShort(b.miner_address)+"</td><td class='muted'>"+conf+"/100</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";
       tb.appendChild(tr);
     });
   }
@@ -384,7 +384,7 @@
     document.getElementById("d-pending-note").textContent="for "+PP.addrShort(MINER.addr);
     var yourShares=MINER.workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0);
     var poolShares=(STATS&&STATS.shares_total)||0;
-    var share=poolShares?yourShares/poolShares:0;
+    var share=poolShares?yourShares/poolShares:0; share=Math.max(0,Math.min(share,1)); // clamp: snapshots can drift past 100%
     document.getElementById("m-share").textContent=(share*100).toFixed(share*100<1?3:2)+"%";
     var wc=document.getElementById("workers"); wc.innerHTML="";
     if(!MINER.workers.length)wc.innerHTML="<p class='muted' style='font-size:13px'>No workers reporting for this address yet.</p>";
@@ -405,7 +405,7 @@
   }
   document.getElementById("bpd").addEventListener("input",function(){
     if(!MINER)return; var ys=MINER.workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0);
-    var ps=(STATS&&STATS.shares_total)||0; profit(ps?ys/ps:0);
+    var ps=(STATS&&STATS.shares_total)||0; profit(Math.max(0,Math.min(ps?ys/ps:0,1)));
   });
 
   function drawHistory(){

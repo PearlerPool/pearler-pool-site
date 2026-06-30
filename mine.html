@@ -123,6 +123,7 @@
     return lines.filter(function(l){return l!==null;}).join("\n");
   }
 
+  var PROMPTS={};
   var OPTIONS={
     pearler:{
       type:"docker",
@@ -173,12 +174,13 @@
 
       if(d.type==="docker"){
         html+='<div class="codeblock"><button class="copy" data-text="cmd-'+key+'">COPY</button><pre id="cmd-'+key+'"></pre></div>'+
-          '<p class="muted" style="font-size:12.5px;margin:14px 0 4px;letter-spacing:.5px">Or let an AI agent do the whole setup — copy a prompt and paste it into <span class="gold">Claude Code</span>, <span class="gold">Claude in Cowork</span>, or <span class="gold">OpenAI Codex</span>. Each prompt is self-contained: it carries all the pool settings and tells the agent exactly what to do.</p>'+
-          '<div class="prompt-row">'+
-            '<div class="codeblock prompt"><span class="tag">CLAUDE PROMPT</span><button class="copy" data-text="prc-'+key+'">COPY PROMPT</button><pre id="prc-'+key+'"></pre></div>'+
-            '<div class="codeblock prompt codex"><span class="tag">CODEX PROMPT</span><button class="copy" data-text="prx-'+key+'">COPY PROMPT</button><pre id="prx-'+key+'"></pre></div>'+
+          '<p class="muted" style="font-size:12.5px;margin:14px 0 6px;letter-spacing:.5px">Or let an AI agent do the whole setup — pick your agent, then copy the prompt and paste it in:</p>'+
+          '<div class="agent-toggle">'+
+            '<button type="button" class="agent-tab active" data-agent="claude" data-key="'+key+'">CLAUDE</button>'+
+            '<button type="button" class="agent-tab" data-agent="codex" data-key="'+key+'">CODEX</button>'+
           '</div>'+
-          '<p class="muted" style="font-size:12.5px;margin-top:10px;letter-spacing:.3px">The agent checks your GPU/Docker, verifies the image, runs the container over TLS, tails the logs until shares are accepted, self-fixes failures, then reports back and shows you on the dashboard. Docker image names are placeholders until the pool operator confirms the real builds — the prompt detects this and asks you for the confirmed name rather than failing silently.</p>';
+          '<div class="codeblock prompt"><span class="tag" id="ptag-'+key+'">CLAUDE PROMPT</span><button class="copy" data-text="pr-'+key+'">COPY PROMPT</button><pre id="pr-'+key+'"></pre></div>'+
+          '<p class="muted" style="font-size:12.5px;margin-top:10px;letter-spacing:.3px">Claude (Code or Cowork) and OpenAI Codex both work. The agent checks your GPU/Docker, verifies the image, runs the container over TLS, tails the logs until shares are accepted, then reports back. Docker image names are placeholders until the pool operator confirms the real builds — the prompt detects this and asks for the confirmed name rather than failing silently.</p>';
       } else { // connect
         html+='<div class="grid c2" style="align-items:start">'+
             '<div class="panel"><div class="card kv" style="border:none;background:none;padding:0">'+
@@ -205,8 +207,8 @@
       host.appendChild(pane);
       pane.querySelector("#cmd-"+key).textContent=d.cmd(s);
       if(d.type==="docker"){
-        pane.querySelector("#prc-"+key).textContent=agentPrompt("claude",d,s);
-        pane.querySelector("#prx-"+key).textContent=agentPrompt("codex",d,s);
+        PROMPTS[key]={claude:agentPrompt("claude",d,s),codex:agentPrompt("codex",d,s)};
+        pane.querySelector("#pr-"+key).textContent=PROMPTS[key].claude;
       }
       if(d.type==="connect"){
         var f=PP.feePct(INFO); pane.querySelector("#c-fee").textContent=(f!=null?f+"%":"—");
@@ -227,6 +229,17 @@
     document.querySelectorAll("#opt-tabs .tab").forEach(function(x){x.classList.remove("active");});
     document.querySelectorAll("#panes .pane").forEach(function(x){x.classList.remove("active");});
     t.classList.add("active"); document.getElementById("pane-"+t.dataset.pane).classList.add("active");
+  });
+
+  // claude / codex prompt toggle (delegated; survives re-render)
+  document.getElementById("panes").addEventListener("click",function(e){
+    var t=e.target.closest(".agent-tab"); if(!t) return;
+    var key=t.dataset.key, agent=t.dataset.agent;
+    t.parentNode.querySelectorAll(".agent-tab").forEach(function(x){x.classList.remove("active");});
+    t.classList.add("active");
+    var pre=document.getElementById("pr-"+key), tag=document.getElementById("ptag-"+key);
+    if(pre&&PROMPTS[key]){ pre.textContent=PROMPTS[key][agent]; var blk=pre.parentNode; if(blk) blk.classList.toggle("codex",agent==="codex"); }
+    if(tag) tag.textContent=(agent==="codex"?"CODEX PROMPT":"CLAUDE PROMPT");
   });
 
   function applyAddr(){

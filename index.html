@@ -93,7 +93,7 @@
       var st=(b.submit_status||"").toUpperCase();
       var cls=st==="ACCEPTED"?"ok":st==="ORPHAN"?"orphan":"bad";
       var tr=document.createElement("tr");
-      tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td>"+(b.worker_name||"—")+"</td><td class='mono-addr'>"+PP.addrShort(b.miner_address)+"</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";
+      tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td>"+PP.wname(b.worker_name)+"</td><td class='mono-addr'>"+PP.addrShort(b.miner_address)+"</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";
       tb.appendChild(tr);
     });
     PP.mockNotice();
