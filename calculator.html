@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>(function(){try{var t=localStorage.getItem('pp-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 <title>Calculator — Pearler Pool</title>
-<meta name="description" content="Estimate your Pearl (PRL) mining earnings — pick a GPU or enter a hashrate and see estimated PRL per day, pool share, and projected returns." />
+<meta name="description" content="Accurate Pearl (PRL) mining calculator — live network hashrate, real emission curve, and live PRL price. Estimate PRL and USD per day, week, and month." />
 <meta name="theme-color" content="#07090e" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Mining calculator — Pearler Pool" />
-<meta property="og:description" content="Estimate your Pearl (PRL) earnings: pick a GPU or enter a hashrate." />
+<meta property="og:description" content="Live, accurate Pearl (PRL) earnings estimate using the real emission curve and on-chain network state." />
 <meta name="twitter:card" content="summary" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307090e'/%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c9a84c'/%3E%3Ccircle cx='12.5' cy='12.5' r='3' fill='%23fff3d0'/%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,7 +35,8 @@
   <header class="container hero" style="padding:54px 0 18px">
     <p class="kicker">// MINING CALCULATOR</p>
     <h1 style="font-size:clamp(28px,4.6vw,46px)">Estimate the haul.</h1>
-    <p class="lede">Pick your card or type a hashrate. Block reward, pool fee, and the live PRL price are pulled in automatically; the network hashrate is your assumption until the pool's live feed is wired up.</p>
+    <p class="lede">A real estimate, not a guess. Live network hashrate, block reward and PRL price are pulled on-chain; rewards follow Pearl's actual emission curve, and the monthly view can model network growth.</p>
+    <p class="muted" id="chain-line" style="font-size:13px;margin-top:10px;letter-spacing:.3px">Loading live chain state…</p>
   </header>
 
   <section class="container" style="padding-bottom:60px">
@@ -43,52 +44,71 @@
       <!-- INPUTS -->
       <div>
         <div class="field">
-          <label>PICK YOUR GPU <span class="muted" style="letter-spacing:0;text-transform:none">— approximate hashrates</span></label>
+          <label>PICK YOUR GPU <span class="muted" style="letter-spacing:0;text-transform:none">— approximate, ±10%</span></label>
           <div class="gpu-pick" id="gpu-pick"></div>
         </div>
 
         <div class="field">
-          <label>YOUR HASHRATE</label>
+          <label>YOUR HASHRATE <span class="muted" style="letter-spacing:0;text-transform:none">— matmul attempts/s</span></label>
           <div class="inrow"><input id="hr" type="number" min="0" step="any" value="311" /><span class="unit">TH/s</span></div>
         </div>
 
         <div class="field">
-          <label>NETWORK HASHRATE <span class="muted" id="net-src" style="letter-spacing:0;text-transform:none">— assumption (live soon)</span></label>
-          <div class="inrow"><input id="net" type="number" min="0" step="any" value="33" /><span class="unit">EH/s</span></div>
+          <label>NETWORK HASHRATE <span class="muted" id="net-src" style="letter-spacing:0;text-transform:none">— loading…</span></label>
+          <div class="inrow"><input id="net" type="number" min="0" step="any" value="33.3" /><span class="unit">EH/s</span></div>
         </div>
 
         <div class="field">
-          <label>BLOCK REWARD</label>
-          <div class="inrow"><input id="rew" type="number" min="0" step="any" value="2562" /><span class="unit">PRL</span></div>
+          <label>PRL PRICE <span class="muted" id="price-src" style="letter-spacing:0;text-transform:none">— loading…</span></label>
+          <div class="inrow"><input id="price" type="number" min="0" step="any" value="0.45" /><span class="unit">USD</span></div>
         </div>
 
         <div class="field">
-          <label>BLOCKS / DAY (NETWORK) <span class="muted" style="letter-spacing:0;text-transform:none">— ~194s target</span></label>
-          <div class="inrow"><input id="bpd" type="number" min="0" step="any" value="445" /><span class="unit">blocks</span></div>
+          <label>AVG BLOCK TIME <span class="muted" id="bt-src" style="letter-spacing:0;text-transform:none">— 194s target</span></label>
+          <div class="inrow"><input id="bt" type="number" min="1" step="any" value="194" /><span class="unit">sec</span></div>
         </div>
 
         <div class="field">
-          <label>PRL PRICE <span class="muted" id="price-src" style="letter-spacing:0;text-transform:none">— fetching live price…</span></label>
-          <div class="inrow"><input id="price" type="number" min="0" step="any" placeholder="0.00" /><span class="unit">USD</span></div>
+          <label>NETWORK GROWTH <span class="muted" style="letter-spacing:0;text-transform:none">— monthly projection only</span></label>
+          <select id="growth" style="width:100%;background:var(--surface-1);border:1px solid var(--line);color:var(--fg);font-family:inherit;font-size:16.5px;padding:12px 14px;outline:none">
+            <option value="0">Frozen — difficulty unchanged</option>
+            <option value="0.05">Conservative — +5% / week</option>
+            <option value="0.10" selected>Moderate — +10% / week</option>
+            <option value="0.20">Aggressive — +20% / week</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>POOL LUCK <span class="muted" style="letter-spacing:0;text-transform:none">— 1.00 = statistically average</span></label>
+          <div class="inrow"><input id="luck" type="number" min="0" step="0.01" value="1.00" /><span class="unit">×</span></div>
         </div>
       </div>
 
       <!-- OUTPUT -->
       <div class="result">
-        <div style="font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">ESTIMATED EARNINGS</div>
+        <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">ESTIMATED EARNINGS</div>
         <div class="big-out"><span id="o-prl-day">—</span><small>PRL / day</small></div>
-        <div class="muted" style="font-size:12px;margin:8px 0 18px" id="o-usd-day-line"></div>
+        <div class="muted" style="font-size:13px;margin:8px 0 18px" id="o-usd-day-line"></div>
         <div class="row"><span>YOUR NETWORK SHARE</span><b id="o-share">—</b></div>
         <div class="row"><span>PRL / day</span><b id="o-prl-day-2">—</b></div>
+        <div class="row"><span>PRL / week</span><b id="o-prl-week">—</b></div>
         <div class="row"><span>PRL / month</span><b id="o-prl-month">—</b></div>
         <div class="row"><span>USD / day</span><b id="o-usd-day">—</b></div>
+        <div class="row"><span>USD / week</span><b id="o-usd-week">—</b></div>
         <div class="row"><span>USD / month</span><b id="o-usd-month">—</b></div>
         <div class="row"><span>POOL FEE</span><b id="o-fee">—</b></div>
-        <p class="muted" style="font-size:12.5px;line-height:1.7;margin-top:14px">Mining is probabilistic — real payouts vary with luck, difficulty, and network growth. This estimate assumes your share of the network equals your share of rewards over time. Not financial advice; see <a class="gold" href="terms.html">Terms</a>.</p>
+        <p class="muted" style="font-size:13px;line-height:1.7;margin-top:14px">Daily uses the current block reward; weekly and monthly step through the emission curve, and the monthly view compounds your chosen network growth (reward dilution). Mining is probabilistic — real payouts vary with luck and difficulty. Not financial advice; see <a class="gold" href="terms.html">Terms</a>.</p>
       </div>
     </div>
 
-    <div style="margin-top:30px;display:flex;gap:12px;flex-wrap:wrap">
+    <!-- SOURCES / METHODOLOGY -->
+    <div class="prose" style="margin-top:34px;max-width:none">
+      <p class="faq-cat" style="margin-top:0">// HOW THIS IS CALCULATED</p>
+      <p style="font-size:14.5px">Your expected payout = (your hashrate ÷ network hashrate) × network PRL minted in the window × luck × (1 − pool fee). Network emission follows Pearl's continuous curve — there are no halving cliffs — so the reward minted between block heights <i>a</i> and <i>b</i> is <span class="gold">cumulative(b) − cumulative(a)</span>, where <span class="gold">cumulative(h) = S·h ⁄ (h + C)</span>, with S = 2.1B PRL total supply and C ≈ 650,226 (the half-supply block). This reproduces the chain's current block reward to within a fraction of a percent.</p>
+      <p style="font-size:13px">Sources: live network hashrate, block height, block reward and PRL price are fetched on-chain from <a href="https://pearltrack.io" target="_blank" rel="noopener">PearlTrack</a> (<a href="https://pearltrack.io/api/summary" target="_blank" rel="noopener">/api/summary</a>). The emission curve and the ≈650,226 half-supply block are documented by <a href="https://pearltrack.io" target="_blank" rel="noopener">PearlTrack</a> and <a href="https://lordofpearls.xyz/emission" target="_blank" rel="noopener">Lord of Pearls</a>; Pearl's 2.1B max supply, declining reward and ~2-minute (194s target) blocks are described by <a href="https://hashrateindex.com/blog/pearl-prl-ai-compute-cryptocurrency/" target="_blank" rel="noopener">Hashrate Index</a>. Hashrate is measured as matmul attempts per second. Per-GPU rates are community estimates and vary with tuning. Pool fee is read live from the pool. Aggregator prices for "PRL" can reference the wrong token, so we use the Pearl-native explorer price.</p>
+    </div>
+
+    <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap">
       <a class="btn gold" href="mine.html">START MINING →</a>
       <a class="btn" href="dashboard.html">OPEN DASHBOARD</a>
     </div>
@@ -105,80 +125,112 @@
 <script>
 (function(){
   PP.rain("rain");
-  // approximate per-card hashrates (TH/s) — community reference figures, vary ±10%
+
+  // approximate per-GPU hashrates (TH/s, matmul attempts/s) — community estimates, vary with tuning
   var GPUS=[
     ["H100",700],["RTX 5090",372],["RTX 4090",311],["RTX 5080",215],
     ["RTX 4080",175],["RTX 4070 Ti",142],["RTX 3090",110],["RTX 4070",110],
     ["RTX 5060 Ti",89],["RTX 3070",70],["RTX 3060 Ti",65]
   ];
   var pick=document.getElementById("gpu-pick");
-  GPUS.forEach(function(g,i){
+  GPUS.forEach(function(g){
     var b=document.createElement("button");
     b.innerHTML=g[0]+" <small>"+g[1]+"</small>";
     b.onclick=function(){
       document.querySelectorAll("#gpu-pick button").forEach(function(x){x.classList.remove("active");});
       b.classList.add("active"); document.getElementById("hr").value=g[1]; calc();
     };
-    if(g[0]==="RTX 4090"){b.classList.add("active");}
+    if(g[0]==="RTX 4090") b.classList.add("active");
     pick.appendChild(b);
   });
 
-  var ids=["hr","net","rew","bpd","price"];
-  ids.forEach(function(id){document.getElementById(id).addEventListener("input",function(){
-    // typing a custom hashrate clears the GPU selection
-    if(id==="hr") document.querySelectorAll("#gpu-pick button").forEach(function(x){x.classList.remove("active");});
-    calc();
-  });});
+  // ---- Pearl emission model (verified against live chain) ----
+  // cumulative(h) = S*h/(h+C) ; subsidy(h)=cumulative(h)-cumulative(h-1)=S*C/((h-1+C)(h+C))
+  var S=2.1e9, C=650226, H0=80231, FEE=0.01;
+  function cumulative(h){ return S*h/(h+C); }
+  function emit(a,b){ return cumulative(b)-cumulative(a); } // PRL minted by network from height a..b
 
-  var FEE=0.01;
   function fmt(n,d){ if(!isFinite(n)) return "—"; return Number(n).toLocaleString("en-US",{maximumFractionDigits:d==null?4:d}); }
+
   function calc(){
-    var hr=parseFloat(document.getElementById("hr").value)||0;       // TH/s
-    var netEH=parseFloat(document.getElementById("net").value)||0;   // EH/s
-    var rew=parseFloat(document.getElementById("rew").value)||0;     // PRL
-    var bpd=parseFloat(document.getElementById("bpd").value)||0;     // blocks/day
-    var price=parseFloat(document.getElementById("price").value)||0; // USD
-    var netTH=netEH*1e6;
-    var share=netTH>0?hr/netTH:0;
-    var prlDay=share*bpd*rew*(1-FEE);
-    var prlMonth=prlDay*30;
+    var hrTH=parseFloat(document.getElementById("hr").value)||0;   // TH/s
+    var netEH=parseFloat(document.getElementById("net").value)||0; // EH/s
+    var price=parseFloat(document.getElementById("price").value)||0;
+    var bt=parseFloat(document.getElementById("bt").value)||194;   // sec/block
+    var luck=parseFloat(document.getElementById("luck").value); if(!isFinite(luck)||luck<0) luck=1;
+    var g=parseFloat(document.getElementById("growth").value)||0;  // weekly network growth fraction
+    var bpd=86400/bt;                                              // blocks/day
+
+    // share of network for a given network size (EH/s); hrTH/(netEH*1e6) since 1 EH/s = 1e6 TH/s
+    function share(netEHd){ return netEHd>0 ? hrTH/(netEHd*1e6) : 0; }
+    // net PRL the user earns on day d (d=0 today), with reward decay + network growth dilution
+    function dayYield(d){
+      var Hd=H0+d*bpd;
+      var minted=emit(Hd, Hd+bpd);              // PRL the whole network mints that day (curve)
+      var netEHd=netEH*Math.pow(1+g, d/7);      // network grows per chosen scenario
+      return share(netEHd)*minted*luck*(1-FEE);
+    }
+    var prlDay=dayYield(0);
+    var prlWeek=0, prlMonth=0, d;
+    for(d=0; d<7;  d++) prlWeek  += dayYield(d);
+    for(d=0; d<30; d++) prlMonth += dayYield(d);
+
+    var sh=share(netEH);
+    document.getElementById("o-share").textContent=(sh>0&&sh*100<0.001)?(sh*100).toExponential(2)+"%":(sh*100).toFixed(5)+"%";
     document.getElementById("o-prl-day").textContent=fmt(prlDay,4);
     document.getElementById("o-prl-day-2").textContent=fmt(prlDay,4)+" PRL";
+    document.getElementById("o-prl-week").textContent=fmt(prlWeek,3)+" PRL";
     document.getElementById("o-prl-month").textContent=fmt(prlMonth,3)+" PRL";
-    document.getElementById("o-share").textContent=(share*100<0.0001&&share>0)?(share*100).toExponential(2)+"%":(share*100).toFixed(6)+"%";
-    document.getElementById("o-fee").textContent=(FEE*100)+"%";
-    var usdDay=prlDay*price, usdMonth=prlMonth*price;
-    document.getElementById("o-usd-day").textContent=price>0?"$"+fmt(usdDay,2):"—";
-    document.getElementById("o-usd-month").textContent=price>0?"$"+fmt(usdMonth,2):"—";
-    document.getElementById("o-usd-day-line").textContent=price>0?"≈ $"+fmt(usdDay,2)+" / day at $"+fmt(price,4)+" per PRL":"enter a PRL price for USD estimates";
+    document.getElementById("o-fee").textContent=(FEE*100).toFixed(0)+"%";
+    document.getElementById("o-usd-day").textContent  = price>0 ? "$"+fmt(prlDay*price,2)   : "—";
+    document.getElementById("o-usd-week").textContent = price>0 ? "$"+fmt(prlWeek*price,2)  : "—";
+    document.getElementById("o-usd-month").textContent= price>0 ? "$"+fmt(prlMonth*price,2) : "—";
+    document.getElementById("o-usd-day-line").textContent = price>0
+      ? "≈ $"+fmt(prlDay*price,2)+" / day at $"+fmt(price,4)+" per PRL"
+      : "enter a PRL price for USD estimates";
   }
 
-  // pull live block reward + fee
-  Promise.all([PP.api("/stats"),PP.api("/pool/info")]).then(function(r){
-    var stats=r[0], info=r[1];
-    var rew=PP.rewardPRL(stats);
-    if(rew>0) document.getElementById("rew").value=rew.toFixed(0);
-    var f=PP.feePct(info); if(f!=null) FEE=f/100;
-    // if a live network hashrate ever appears, prefill it
-    var nh=stats&&(stats.network_hashrate||(stats.network&&stats.network.hashrate));
-    if(nh){ document.getElementById("net").value=(Number(nh)/1e18).toFixed(1); document.getElementById("net-src").textContent="— live"; }
-    calc(); PP.mockNotice();
+  ["hr","net","price","bt","luck"].forEach(function(id){
+    document.getElementById(id).addEventListener("input",function(){
+      if(id==="hr") document.querySelectorAll("#gpu-pick button").forEach(function(x){x.classList.remove("active");});
+      calc();
+    });
   });
+  document.getElementById("growth").addEventListener("change",calc);
 
-  // live PRL/USD price from CoinGecko (CORS-enabled public API)
-  function loadPrice(){
-    fetch("https://api.coingecko.com/api/v3/simple/price?ids=pearl-2&vs_currencies=usd&include_24hr_change=true",{cache:"no-store"})
-      .then(function(r){return r.json();})
-      .then(function(d){
-        var o=d&&d["pearl-2"]; if(!o||o.usd==null) throw 0;
-        document.getElementById("price").value=o.usd;
-        var ch=o.usd_24h_change;
-        document.getElementById("price-src").textContent="— live $"+Number(o.usd).toFixed(4)+(ch!=null?" ("+(ch>=0?"+":"")+Number(ch).toFixed(2)+"% 24h)":"")+" · CoinGecko";
+  // ---- live on-chain state from PearlTrack (via same-origin proxy /net-api → pearltrack.io/api) ----
+  function loadChain(){
+    fetch("/net-api/summary",{headers:{accept:"application/json"},cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+      .then(function(j){
+        if(j.totalSupplyPRL) S=Number(j.totalSupplyPRL);
+        if(j.height) H0=Number(j.height);
+        // derive C from live emitted fraction (cumulative=S*H/(H+C) => frac=H/(H+C) => C=H(1-frac)/frac)
+        if(j.emittedFraction>0) C=H0*(1-j.emittedFraction)/j.emittedFraction;
+        var netEH=j.nethash?Number(j.nethash)/1e18:null;
+        var bt=j.avgBlockTimeSeconds||j.blockTimeTargetSeconds;
+        if(netEH){ document.getElementById("net").value=netEH.toFixed(2);
+          document.getElementById("net-src").textContent="— live "+netEH.toFixed(2)+" EH/s · PearlTrack"; }
+        if(bt){ document.getElementById("bt").value=Number(bt).toFixed(0);
+          document.getElementById("bt-src").textContent="— live avg · 194s target"; }
+        if(j.priceUSD){ document.getElementById("price").value=j.priceUSD;
+          document.getElementById("price-src").textContent="— live $"+Number(j.priceUSD).toFixed(4)+" · PearlTrack"; }
+        var rew=j.blockSubsidyPRL?Number(j.blockSubsidyPRL):cumulative(H0)-cumulative(H0-1);
+        document.getElementById("chain-line").innerHTML="Live chain: height <b class='gold'>"+H0.toLocaleString()+"</b> · block reward <b class='gold'>"+rew.toFixed(1)+" PRL</b> · network <b class='gold'>"+(netEH?netEH.toFixed(2):"—")+" EH/s</b> · "+(j.emittedFraction?(j.emittedFraction*100).toFixed(2)+"% emitted":"")+" · via PearlTrack";
         calc();
       })
-      .catch(function(){ document.getElementById("price-src").textContent="— enter a price for USD estimates"; });
+      .catch(function(){
+        document.getElementById("net-src").textContent="— edit to your estimate (live feed unavailable)";
+        document.getElementById("price-src").textContent="— edit to set USD";
+        document.getElementById("chain-line").textContent="Live chain feed unavailable — using editable defaults. (Real data shows on the deployed site.)";
+        calc();
+      });
   }
-  loadPrice();
+
+  // pool fee from our own pool
+  PP.api("/pool/info").then(function(info){ var f=PP.feePct(info); if(f!=null){ FEE=f/100; } calc(); });
+
+  loadChain();
   calc();
 })();
 </script>
