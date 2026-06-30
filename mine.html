@@ -54,7 +54,7 @@
     <div class="section-head"><span class="tick">//</span><h2>Choose how you mine</h2></div>
     <div class="tabs" id="opt-tabs">
       <button class="tab active" data-pane="pearler">01 · OUR MINER<span class="r">★ RECOMMENDED · 2% FEE</span></button>
-      <button class="tab" data-pane="akoya">02 · AKOYA MINER<span class="r">OPEN SOURCE · 0% FEE</span></button>
+      <button class="tab" data-pane="akoya">02 · OPEN SOURCE<span class="r">ALPHA-MINER · 0% · WORKS TODAY</span></button>
       <button class="tab" data-pane="official">03 · PERL OFFICIAL<span class="r">STANDARD · 0% FEE</span></button>
       <button class="tab" data-pane="connect">04 · CONNECT YOUR OWN<span class="r">ANY MINER · 0% FEE</span></button>
     </div>
@@ -145,11 +145,11 @@
       type:"docker",
       fee:"0% fee",
       feeNote:"OPEN SOURCE · ONLY THE 1% POOL NETWORK FEE",
-      title:"The open-source Akoya miner — for hunters who want to read and verify the source. No extra miner fee.",
-      miner:"the open-source Akoya miner pointed at Pearler Pool",
-      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name akoya-miner \\\n  -e AKOYA_POOL_HOST="+s.host+" \\\n  -e AKOYA_POOL_PORT="+s.port_tls+" -e AKOYA_POOL_TLS=1 \\\n  -e AKOYA_POOL_WALLET="+ADDR+" \\\n  -e AKOYA_POOL_WORKER=$(hostname) \\\n  registry.akoyapool.com/akoya-miner:latest";},
-      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name akoya-miner \\\n     -e AKOYA_POOL_HOST="+s.host+" -e AKOYA_POOL_PORT="+s.port_tls+" -e AKOYA_POOL_TLS=1 \\\n     -e AKOYA_POOL_WALLET="+ADDR+" -e AKOYA_POOL_WORKER=$(hostname) \\\n     registry.akoyapool.com/akoya-miner:latest";},
-      logname:"akoya-miner"
+      title:"The open-source alpha-miner — the public, audited Docker image alphaminetech/pearl-miner, 0% miner fee. This one works today (no waiting on a pool image), so it's the quickest real start.",
+      miner:"the open-source alpha-miner (public Docker image alphaminetech/pearl-miner) pointed at Pearler Pool",
+      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name alpha-miner \\\n  -e PEARL_ADDRESS="+ADDR+" \\\n  -e PEARL_WORKER=$(hostname) \\\n  -e PEARL_POOL_HOST="+s.host+" \\\n  -e PEARL_POOL_PORT="+s.port_plain+" \\\n  alphaminetech/pearl-miner";},
+      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name alpha-miner \\\n     -e PEARL_ADDRESS="+ADDR+" -e PEARL_WORKER=$(hostname) \\\n     -e PEARL_POOL_HOST="+s.host+" -e PEARL_POOL_PORT="+s.port_plain+" \\\n     alphaminetech/pearl-miner";},
+      logname:"alpha-miner"
     },
     official:{
       type:"docker",
@@ -261,7 +261,13 @@
   document.getElementById("addr-apply").onclick=applyAddr;
   document.getElementById("addr").addEventListener("keydown",function(e){if(e.key==="Enter")applyAddr();});
 
-  PP.api("/pool/info").then(function(info){ INFO=info; renderPanes(); PP.mockNotice(); });
+  PP.api("/pool/info").then(function(info){
+    INFO=info;
+    // Miners connect to the p2 subdomain (the live stratum); /pool/info reports the apex (website) by mistake.
+    INFO.stratum = INFO.stratum || {};
+    INFO.stratum.host = window.PEARLER_STRATUM_HOST || "p2.pearlerpool.com";
+    renderPanes(); PP.mockNotice();
+  });
 })();
 </script>
 </body>

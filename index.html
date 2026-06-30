@@ -57,6 +57,7 @@
       <div class="stat"><div class="lbl">CURRENT HEIGHT</div><div class="val" id="s-height">—</div></div>
       <div class="stat"><div class="lbl">POOL FEE</div><div class="val" id="s-fee">—</div></div>
       <div class="stat"><div class="lbl">NETWORK HASHRATE</div><div class="val" id="s-nethash"><span class="soon">SOON</span></div></div>
+      <div class="stat"><div class="lbl">PRL PRICE</div><div class="val" id="s-price"><span class="soon">—</span></div></div>
     </div>
   </section>
 
@@ -86,7 +87,9 @@
     PP.mockNotice();
   });
   PP.netApi("/summary").then(function(d){
-    if(d&&d.nethash) document.getElementById("s-nethash").innerHTML=(Number(d.nethash)/1e18).toFixed(2)+' <small>EH/s</small>';
+    if(!d) return;
+    if(d.nethash) document.getElementById("s-nethash").innerHTML=(Number(d.nethash)/1e18).toFixed(2)+' <small>EH/s</small>';
+    if(d.priceUSD!=null) document.getElementById("s-price").innerHTML='$'+Number(d.priceUSD).toFixed(4);
   });
 })();
 </script>
