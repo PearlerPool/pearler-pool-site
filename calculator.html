@@ -44,7 +44,7 @@
       <!-- INPUTS -->
       <div>
         <div class="field">
-          <label>PICK YOUR GPU <span class="muted" style="letter-spacing:0;text-transform:none">— approximate, ±10%</span></label>
+          <label>PICK YOUR GPU <span class="muted" style="letter-spacing:0;text-transform:none">— approximate, ±15%</span></label>
           <div class="gpu-pick" id="gpu-pick"></div>
         </div>
 
@@ -88,7 +88,8 @@
       <div class="result">
         <div style="font-size:12px;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">ESTIMATED EARNINGS</div>
         <div class="big-out"><span id="o-prl-day">—</span><small>PRL / day</small></div>
-        <div class="muted" style="font-size:13px;margin:8px 0 18px" id="o-usd-day-line"></div>
+        <div class="muted" id="o-range" style="font-size:12.5px;margin:6px 0 2px"></div>
+        <div class="muted" style="font-size:13px;margin:2px 0 16px" id="o-usd-day-line"></div>
         <div class="row"><span>YOUR NETWORK SHARE</span><b id="o-share">—</b></div>
         <div class="row"><span>PRL / day</span><b id="o-prl-day-2">—</b></div>
         <div class="row"><span>PRL / week</span><b id="o-prl-week">—</b></div>
@@ -97,7 +98,7 @@
         <div class="row"><span>USD / week</span><b id="o-usd-week">—</b></div>
         <div class="row"><span>USD / month</span><b id="o-usd-month">—</b></div>
         <div class="row"><span>POOL FEE</span><b id="o-fee">—</b></div>
-        <p class="muted" style="font-size:13px;line-height:1.7;margin-top:14px"><b style="color:var(--fg)">Estimates only, as-is with no guarantee of accuracy — Pearler Pool is not liable for decisions made from these figures.</b> Day/week/month assume stable difficulty unless you pick a network-growth scenario, which then steps the emission curve and compounds dilution. Mining is probabilistic; real payouts vary with luck, difficulty, price and hardware. Not financial advice — see <a class="gold" href="terms.html">Terms</a>.</p>
+        <p class="muted" style="font-size:13px;line-height:1.7;margin-top:14px"><b style="color:var(--fg)">Estimates only, as-is with no guarantee of accuracy — Pearler Pool is not liable for decisions made from these figures.</b> Day/week/month assume stable difficulty unless you pick a network-growth scenario, which then steps the emission curve and compounds dilution. Mining is probabilistic; real payouts commonly differ by <b style="color:var(--fg)">±20% or more</b> with luck, difficulty, PRL price and hardware tuning — treat every figure as a rough guide, not a promise. Not financial advice — see <a class="gold" href="terms.html">Terms</a>.</p>
       </div>
     </div>
 
@@ -187,6 +188,9 @@
     document.getElementById("o-usd-day-line").textContent = price>0
       ? "≈ $"+fmt(prlDay*price,2)+" / day at $"+fmt(price,4)+" per PRL"
       : "enter a PRL price for USD estimates";
+    document.getElementById("o-range").textContent = prlDay>0
+      ? "likely range "+fmt(prlDay*0.8,3)+" – "+fmt(prlDay*1.2,3)+" PRL/day (±20% for luck, difficulty & price)"
+      : "";
   }
 
   ["hr","net","price","bt","luck"].forEach(function(id){

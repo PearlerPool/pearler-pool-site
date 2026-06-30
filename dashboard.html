@@ -390,7 +390,7 @@
     if(!MINER.workers.length)wc.innerHTML="<p class='muted' style='font-size:13px'>No workers reporting for this address yet.</p>";
     MINER.workers.forEach(function(w){
       var c=document.createElement("div"); c.className="card";
-      c.innerHTML="<div class='h'>"+(w.name||"worker")+"<span class='badge ok'>ONLINE</span></div><div class='kv'><div class='kv-row'><span>SHARES</span><b>"+PP.num(w.shares)+"</b></div><div class='kv-row'><span>LAST SHARE</span><b>"+PP.ago(w.last_share)+"</b></div><div class='kv-row'><span>HASHRATE</span><b class='muted'>soon</b></div></div>";
+      c.innerHTML="<div class='h'><span class='wn'>"+PP.wname(w.name||"worker")+"</span><span class='badge ok'>ONLINE</span></div><div class='kv'><div class='kv-row'><span>SHARES</span><b>"+PP.num(w.shares)+"</b></div><div class='kv-row'><span>LAST SHARE</span><b>"+PP.ago(w.last_share)+"</b></div><div class='kv-row'><span>HASHRATE</span><b class='muted'>soon</b></div></div>";
       wc.appendChild(c);
     });
     profit(share); drawHistory();

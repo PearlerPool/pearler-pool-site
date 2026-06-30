@@ -69,9 +69,9 @@ h1,h2,h3{font-weight:500;letter-spacing:-.4px}
 /* stat bar */
 .statbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--line-2);
   border:1px solid var(--line-2)}
-.stat{background:var(--bg);padding:22px 20px}
-.stat .lbl{font-size:12px;letter-spacing:1.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
-.stat .val{margin-top:10px;font-size:clamp(23px,2.6vw,31px);font-weight:500;color:var(--fg)}
+.stat{background:var(--bg);padding:20px 15px;min-width:0;overflow:hidden}
+.stat .lbl{font-size:12px;letter-spacing:1.2px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.stat .val{margin-top:10px;font-size:clamp(17px,1.9vw,22px);font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stat .val small{font-size:14px;color:var(--muted);font-weight:400;margin-left:4px}
 .stat .soon{font-size:12.5px;color:var(--faint);letter-spacing:1px}
 
@@ -82,7 +82,8 @@ h1,h2,h3{font-weight:500;letter-spacing:-.4px}
 .grid.c3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .card{border:1px solid var(--line);background:var(--surface-1);padding:20px;transition:.2s}
 .card:hover{border-color:var(--line)}
-.card .h{font-size:14px;letter-spacing:.8px;display:flex;justify-content:space-between;align-items:center}
+.card .h{font-size:14px;letter-spacing:.8px;display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0}
+.card .h .wn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .card .kv{margin-top:14px;display:flex;flex-direction:column;gap:9px}
 .kv-row{display:flex;justify-content:space-between;font-size:14.5px}
 .kv-row span:first-child{color:var(--muted)}
@@ -241,7 +242,8 @@ h1,h2,h3{font-weight:500;letter-spacing:-.4px}
 .donut svg{transform:rotate(-90deg)}
 .donut .lbl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .donut .lbl b{font-size:22px;font-weight:500;color:var(--gold)}
-.donut .lbl span{font-size:11px;letter-spacing:1px;color:var(--muted);margin-top:2px}
+.donut .lbl{padding:0 6px}
+.donut .lbl span{font-size:9px;letter-spacing:.4px;color:var(--muted);margin-top:3px;max-width:90px;line-height:1.25;text-align:center}
 .donut-kv{display:flex;flex-direction:column;gap:12px;min-width:0}
 .donut-kv .k{font-size:12px;letter-spacing:1px;color:var(--muted)}
 .donut-kv .v{font-size:20px;font-weight:500;margin-top:2px}
