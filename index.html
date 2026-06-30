@@ -55,6 +55,7 @@
       <div class="stat"><div class="lbl">ACTIVE MINERS</div><div class="val" id="s-miners">—</div></div>
       <div class="stat"><div class="lbl">TOTAL SHARES</div><div class="val" id="s-shares">—</div></div>
       <div class="stat"><div class="lbl">CURRENT HEIGHT</div><div class="val" id="s-height">—</div></div>
+      <div class="stat"><div class="lbl">POOL HASHRATE</div><div class="val" id="s-poolhash"><span class="soon">SOON</span></div></div>
       <div class="stat"><div class="lbl">POOL FEE</div><div class="val" id="s-fee">—</div></div>
       <div class="stat"><div class="lbl">NETWORK HASHRATE</div><div class="val" id="s-nethash"><span class="soon">SOON</span></div></div>
       <div class="stat"><div class="lbl">PRL PRICE</div><div class="val" id="s-price"><span class="soon">—</span></div></div>
@@ -82,6 +83,8 @@
       var sessions=PP.activeMiners(stats);
       var minerCount=PP.topMiners(miners).length;
       PP.countUp(document.getElementById("s-miners"), sessions||minerCount);
+      var ph=PP.poolHashrate(stats), phe=document.getElementById("s-poolhash");
+      if(phe) phe.innerHTML=ph?ph.replace(/\s*([A-Za-z]+\/s)$/,' <small>$1</small>'):'<span class="soon">SOON</span>';
     }
     var fee=PP.feePct(info); document.getElementById("s-fee").textContent=(fee!=null?fee+"%":"—");
     PP.mockNotice();
