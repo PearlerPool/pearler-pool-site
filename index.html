@@ -49,7 +49,7 @@
       <div class="stat"><div class="lbl">TOTAL SHARES</div><div class="val" id="s-shares">—</div></div>
       <div class="stat"><div class="lbl">CURRENT HEIGHT</div><div class="val" id="s-height">—</div></div>
       <div class="stat"><div class="lbl">POOL FEE</div><div class="val" id="s-fee">—</div></div>
-      <div class="stat"><div class="lbl">NETWORK HASHRATE</div><div class="val"><span class="soon">SOON</span></div></div>
+      <div class="stat"><div class="lbl">NETWORK HASHRATE</div><div class="val" id="s-nethash"><span class="soon">SOON</span></div></div>
     </div>
   </section>
 
@@ -97,6 +97,9 @@
       tb.appendChild(tr);
     });
     PP.mockNotice();
+  });
+  PP.netApi("/summary").then(function(d){
+    if(d&&d.nethash) document.getElementById("s-nethash").innerHTML=(Number(d.nethash)/1e18).toFixed(2)+' <small>EH/s</small>';
   });
 })();
 </script>

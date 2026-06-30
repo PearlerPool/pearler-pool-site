@@ -29,6 +29,15 @@
     }
   }
 
+  /* ---------- on-chain network state via PearlTrack (same-origin proxy /net-api) ---------- */
+  async function netApi(path) {
+    try {
+      var r = await fetch("/net-api" + path, { headers: { accept: "application/json" } });
+      if (!r.ok) throw new Error(r.status);
+      return await r.json();
+    } catch (e) { return null; }
+  }
+
   /* ---------- field accessors (tolerant of spec vs live naming) ---------- */
   function job(stats) { return (stats && (stats.job || stats.current_job)) || {}; }
   function subs(stats) { return (stats && (stats.submissions || stats.blocks)) || {}; }
@@ -124,7 +133,7 @@
   PP.api = api; PP.job = job; PP.subs = subs; PP.blocksFound = blocksFound; PP.activeMiners = activeMiners;
   PP.feePct = feePct; PP.rewardPRL = rewardPRL; PP.topMiners = topMiners; PP.blockList = blockList; PP.workerList = workerList;
   PP.num = num; PP.grainsToPRL = grainsToPRL; PP.addrShort = addrShort; PP.ago = ago;
-  PP.countUp = countUp; PP.copy = copy; PP.mockNotice = mockNotice; PP.rain = rain;
+  PP.countUp = countUp; PP.copy = copy; PP.mockNotice = mockNotice; PP.rain = rain; PP.netApi = netApi;
 
   /* ---------- dark / light theme toggle ---------- */
   function initTheme() {

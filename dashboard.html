@@ -89,10 +89,9 @@
 
         <!-- network hashrate -->
         <div class="dcard">
-          <div class="ct">◇ NETWORK HASHRATE <span class="muted" style="letter-spacing:1px">(1D)</span></div>
-          <div class="big"><span class="soon" style="font-size:16px;letter-spacing:2px">SOON</span></div>
-          <div class="sub">from the Pearl network</div>
-          <div class="soon-spark">∿ ∿ ∿</div>
+          <div class="ct">◇ NETWORK HASHRATE <span class="muted" style="letter-spacing:1px">(LIVE)</span></div>
+          <div class="big" id="d-nethash"><span class="soon" style="font-size:16px;letter-spacing:2px">SOON</span></div>
+          <div class="sub" id="d-net-sub">from the Pearl network</div>
         </div>
 
         <!-- output per day -->
@@ -251,7 +250,7 @@
     var rejPct=(sAcc+rej)?rej/(sAcc+rej)*100:0;
     document.getElementById("oj-val").textContent=orphanPct.toFixed(2)+"% / "+rejPct.toFixed(2)+"%";
     document.getElementById("oj-note").textContent="orphan "+orphanPct.toFixed(2)+"% · reject "+rejPct.toFixed(2)+"%";
-    document.getElementById("lb-meta").textContent="latest height "+PP.num(PP.job(STATS).height)+" · network hashrate soon";
+    document.getElementById("lb-meta").textContent="latest height "+PP.num(PP.job(STATS).height);
     renderBlockGrid();
   }
   function setDonut(frac,pct,cap){
@@ -427,6 +426,14 @@
   if(location.hash.length>4){var a=decodeURIComponent(location.hash.slice(1));document.getElementById("addr").value=a;lookup(a);}
   addEventListener("resize",function(){drawProduction();if(MINER)drawHistory();});
   addEventListener("pp-theme",function(){drawProduction();if(MINER)drawHistory();});
+  // live network hashrate / difficulty from PearlTrack (same-origin /net-api proxy)
+  PP.netApi("/summary").then(function(d){
+    if(!d) return;
+    if(d.nethash){ var el=document.getElementById("d-nethash"); if(el) el.innerHTML=(Number(d.nethash)/1e18).toFixed(2)+' <small>EH/s</small>'; }
+    var sub=document.getElementById("d-net-sub"); if(sub) sub.textContent="live · via PearlTrack";
+    var lb=document.getElementById("lb-meta");
+    if(lb) lb.textContent="latest height "+PP.num(PP.job(STATS).height)+" · network "+(d.nethash?(Number(d.nethash)/1e18).toFixed(2)+" EH/s":"—")+(d.difficulty?" · diff "+(Number(d.difficulty)/1e6).toFixed(1)+"M":"")+" · via PearlTrack";
+  });
 })();
 </script>
 </body>
