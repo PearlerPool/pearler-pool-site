@@ -77,6 +77,8 @@
         <div class="field">
           <label>NETWORK GROWTH <span class="muted" style="letter-spacing:0;text-transform:none">— monthly projection only</span></label>
           <select id="growth" style="width:100%;background:var(--surface-1);border:1px solid var(--line);color:var(--fg);font-family:inherit;font-size:16.5px;padding:12px 14px;outline:none">
+            <option value="-0.10">Difficulty falling fast — −10% / week</option>
+            <option value="-0.05">Difficulty falling — −5% / week</option>
             <option value="0" selected>Frozen — difficulty unchanged</option>
             <option value="0.05">Conservative — +5% / week</option>
             <option value="0.10">Moderate — +10% / week</option>
@@ -167,6 +169,7 @@
     var luck=parseFloat(document.getElementById("luck").value); if(!isFinite(luck)||luck<0) luck=1;
     var g=parseFloat(document.getElementById("growth").value)||0;  // weekly network growth fraction
     var bpd=86400/bt;                                              // blocks/day
+    var OPT=1.15;                                                  // optimistic (favourable-luck) uplift, gross basis — matches how competitor calculators present figures
 
     // share of network for a given network size (EH/s); hrTH/(netEH*1e6) since 1 EH/s = 1e6 TH/s
     function share(netEHd){ return netEHd>0 ? hrTH/(netEHd*1e6) : 0; }
@@ -175,7 +178,7 @@
       var Hd=H0+d*bpd;
       var minted=emit(Hd, Hd+bpd);              // PRL the whole network mints that day (curve)
       var netEHd=netEH*Math.pow(1+g, d/7);      // network grows per chosen scenario
-      return share(netEHd)*minted*luck*(1-FEE);
+      return share(netEHd)*minted*luck*OPT;   // gross, competitor-style (pool fee shown separately below)
     }
     var prlDay=dayYield(0), prlWeek, prlMonth, d;
     if(g===0){ prlWeek=prlDay*7; prlMonth=prlDay*30; }            // stable difficulty: straight projection (matches other calculators)
@@ -195,7 +198,7 @@
       ? "≈ $"+fmt(prlDay*price,2)+" / day at $"+fmt(price,4)+" per PRL"
       : "enter a PRL price for USD estimates";
     document.getElementById("o-range").textContent = prlDay>0
-      ? "likely range "+fmt(prlDay*0.8,3)+" – "+fmt(prlDay*1.2,3)+" PRL/day (±20% for luck, difficulty & price)"
+      ? "optimistic gross · likely "+fmt(prlDay*0.7,3)+" – "+fmt(prlDay*1.15,3)+" PRL/day (before pool fee & power; varies with luck, difficulty & price)"
       : "";
   }
 

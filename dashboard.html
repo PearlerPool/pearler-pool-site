@@ -5,15 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>(function(){try{var t=localStorage.getItem('pp-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}})();</script>
 <title>Dashboard — Pearler Pool</title>
-<meta name="description" content="Pearler Pool dashboard — look up any prl1 address for workers, balances, payouts, a daily estimate, and a performance history no other Pearl pool offers." />
+<meta name="description" content="Pearler Pool dashboard — track your miners' hashrate, shares and earnings, the pool's blocks and hashrate, and live Pearl network stats. Powered by the p2 pool API and PearlTrack." />
 <meta name="theme-color" content="#07090e" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Dashboard — Pearler Pool" />
-<meta property="og:description" content="Look up any Pearl (PRL) address: live on-chain balance, transactions and pool activity, plus Pearl network hashrate history." />
+<meta property="og:description" content="Track your miners, the pool, and the Pearl network — live hashrate, earnings, blocks and history." />
 <meta name="twitter:card" content="summary" />
 <meta name="robots" content="index, follow, max-image-preview:large" />
-<meta name="author" content="Pearler Pool" />
-<meta name="keywords" content="Pearl address lookup, PRL balance, Pearl block explorer, Pearl network hashrate, PRL transactions, Pearler Pool dashboard, Pearl miner stats" />
+<meta name="keywords" content="Pearl miner dashboard, PRL hashrate, Pearler Pool stats, Pearl network hashrate, PRL earnings, Pearl block reward, mining pool dashboard" />
 <link rel="canonical" href="https://pearlerpool.com/dashboard.html" />
 <meta property="og:url" content="https://pearlerpool.com/dashboard.html" />
 <meta property="og:site_name" content="Pearler Pool" />
@@ -38,213 +37,164 @@
     </div>
   </div></nav>
 
-  <header class="container hero" style="padding:54px 0 22px">
+  <header class="container hero" style="padding:48px 0 18px">
     <p class="kicker">// DASHBOARD</p>
-    <h1 style="font-size:clamp(28px,4.4vw,46px)">Track the hunt.</h1>
-    <p style="max-width:62ch">Look up any <span class="gold">prl1…</span> address for live on-chain balances and transactions, plus its activity on Pearler Pool — and track the Pearl network's performance over time.</p>
-    <div class="lookup" style="margin-top:22px">
-      <input id="addr" placeholder="prl1… payout address" spellcheck="false" />
+    <h1 style="font-size:clamp(28px,4.4vw,44px)">Track the hunt.</h1>
+    <p style="max-width:64ch">Manage your miners, the pool and the Pearl network in one place — live hashrate, earnings, blocks and history. Miner &amp; pool data from <span class="gold">p2.pearlerpool.com</span>; network data on-chain via <a class="gold" href="https://pearltrack.io" target="_blank" rel="noopener">PearlTrack</a>.</p>
+    <div class="lookup" style="margin-top:20px">
+      <input id="addr" placeholder="prl1… address" spellcheck="false" />
       <button id="go">LOOK UP</button>
     </div>
+    <p class="muted" style="font-size:12px;margin-top:8px">Defaults to the Pearler Pool address and remembers your last lookup.</p>
   </header>
 
   <div class="container">
-    <!-- sub-tabs + range -->
     <div class="subtabbar">
       <div class="subtabs" id="subtabs">
-        <button class="subtab active" data-view="overview">OVERVIEW</button>
-        <button class="subtab" data-view="blocks">BLOCKS</button>
-        <button class="subtab" data-view="address">ADDRESS</button>
-        <button class="subtab" data-view="ranking">RANKING</button>
-      </div>
-      <div class="range" id="range">
-        <button class="active" data-days="1">1D</button>
-        <button data-days="3">3D</button>
-        <button data-days="15">15D</button>
+        <button class="subtab active" data-view="miners">YOUR MINERS</button>
+        <button class="subtab" data-view="pool">POOL</button>
+        <button class="subtab" data-view="network">NETWORK</button>
       </div>
     </div>
 
-    <!-- ============ OVERVIEW ============ -->
-    <section class="view" id="view-overview">
-      <div class="dash-grid">
-        <!-- pool share donut -->
-        <div class="dcard feature">
-          <div class="ct">◴ POOL SHARE</div>
-          <div class="donut-wrap">
-            <div class="donut">
-              <svg viewBox="0 0 108 108" width="108" height="108">
-                <circle cx="54" cy="54" r="46" fill="none" stroke="rgba(233,230,221,.10)" stroke-width="9"/>
-                <circle id="donut-arc" cx="54" cy="54" r="46" fill="none" stroke="#c9a84c" stroke-width="9" stroke-dasharray="0 289"/>
-              </svg>
-              <div class="lbl"><b id="donut-pct">—</b><span id="donut-cap">SHARE ACCEPT</span></div>
+    <!-- ============================ YOUR MINERS ============================ -->
+    <section class="view" id="view-miners">
+      <div class="section-head" style="margin:2px 0 4px"><span class="tick">//</span><h2 style="font-size:18px">Miner dashboard</h2><span class="badge" style="margin-left:auto">PPLNS</span></div>
+      <p class="mono-addr" id="m-addr" style="font-size:12.5px;color:var(--muted);margin:0 0 18px;word-break:break-all"></p>
+
+      <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
+        <div class="card"><div class="h">BALANCE</div><div class="big gold" style="font-size:23px;margin-top:8px" id="m-balance">—</div><div class="muted" style="font-size:12px">PRL · pending payout</div></div>
+        <div class="card"><div class="h">HASHRATE <span class="delta flat" id="m-hr-delta" style="margin-left:6px">—</span></div><div class="big" style="font-size:23px;margin-top:8px" id="m-hr">—</div><div class="muted" style="font-size:12px">reported to the pool</div></div>
+        <div class="card"><div class="h">SHARES</div><div class="big" style="font-size:23px;margin-top:8px" id="m-shares">—</div><div class="muted" style="font-size:12px">accepted (PPLNS)</div></div>
+        <div class="card"><div class="h">WORKERS</div><div class="big" style="font-size:23px;margin-top:8px" id="m-workers">—</div><div class="muted" style="font-size:12px" id="m-workers-sub">active</div></div>
+      </div>
+
+      <div class="grid c2" style="margin-bottom:4px">
+        <div>
+          <div class="section-head" style="margin:6px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Statistics overview</h2></div>
+          <div class="panel"><div class="kv">
+            <div class="kv-row"><span>HASHRATE</span><b id="s-hr">—</b></div>
+            <div class="kv-row"><span>NETWORK SHARE</span><b id="s-netshare">—</b></div>
+            <div class="kv-row"><span>WORKERS</span><b id="s-workers">—</b></div>
+            <div class="kv-row"><span>SHARES</span><b id="s-shares2">—</b></div>
+            <div class="kv-row"><span>LAST SHARE</span><b id="s-last">—</b></div>
+            <div class="kv-row"><span>ON-CHAIN BALANCE</span><b id="s-onchain">—</b></div>
+            <div class="kv-row"><span>PENDING BALANCE</span><b class="gold" id="s-pending">—</b></div>
+            <div class="kv-row"><span>TOTAL RECEIVED</span><b id="s-received">—</b></div>
+            <div class="kv-row"><span>PAYMENTS COUNT</span><b id="s-payments">—</b></div>
+            <div class="kv-row"><span>MODE</span><b>PPLNS</b></div>
+          </div></div>
+        </div>
+        <div>
+          <div class="section-head" style="margin:6px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Your earnings</h2><span class="badge ok" id="m-price" style="margin-left:auto">PRL —</span></div>
+          <div class="panel">
+            <div class="kv">
+              <div class="kv-row"><span>NETWORK SHARE</span><b id="me-netshare">—</b></div>
+              <div class="kv-row"><span>BLOCK REWARD</span><b id="me-reward">—</b></div>
+              <div class="kv-row"><span>NET BLOCKS / DAY</span><b id="me-bpd">—</b></div>
+              <div class="kv-row"><span>POOL FEE</span><b id="me-fee">—</b></div>
             </div>
-            <div class="donut-kv">
-              <div><div class="k">POOL OUTPUT</div><div class="v" id="d-out">—</div><div class="r" id="d-out-r">blocks accepted</div></div>
-              <div><div class="k">BLOCK REWARD</div><div class="v" id="d-reward">—</div><div class="r">PRL · current job</div></div>
+            <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+              <span class="muted" style="font-size:12px">EST. DAILY</span><span style="text-align:right"><span class="big gold" id="me-daily" style="font-size:24px">—</span> <span class="muted" id="me-daily-usd" style="font-size:12.5px"></span></span>
             </div>
+            <div class="kv" style="margin-top:12px">
+              <div class="kv-row"><span>EST. WEEKLY</span><b id="me-weekly">—</b></div>
+              <div class="kv-row"><span>EST. MONTHLY</span><b id="me-monthly">—</b></div>
+            </div>
+            <p class="muted" style="font-size:12px;margin-top:10px;line-height:1.6">Hashrate-based estimate: your share of the <b>network</b> × block reward × network blocks/day, less pool fee. Estimate only — real payouts vary with luck &amp; difficulty.</p>
           </div>
         </div>
-
-        <!-- pool hashrate -->
-        <div class="dcard">
-          <div class="ct">⚡ POOL HASHRATE <span class="muted" style="letter-spacing:1px">(LIVE)</span></div>
-          <div class="big" id="d-poolhash"><span class="soon" style="font-size:16px;letter-spacing:2px">SOON</span></div>
-          <div class="sub" id="d-poolhash-sub">from p2.pearlerpool.com</div>
-          <div class="soon-spark">∿ ∿ ∿</div>
-        </div>
-
-        <!-- network hashrate -->
-        <div class="dcard">
-          <div class="ct">◇ NETWORK HASHRATE <span class="muted" style="letter-spacing:1px">(LIVE)</span></div>
-          <div class="big" id="d-nethash"><span class="soon" style="font-size:16px;letter-spacing:2px">SOON</span></div>
-          <div class="sub" id="d-net-sub">from the Pearl network</div>
-        </div>
-
-        <!-- output per day -->
-        <div class="dcard feature">
-          <div class="ct">▦ OUTPUT PER P/DAY</div>
-          <div class="obars">
-            <div class="obar"><span class="k">LAST 1H</span><span class="track"><span class="fill" style="width:0"></span></span><span class="v soon">soon</span></div>
-            <div class="obar"><span class="k">LAST 8H</span><span class="track"><span class="fill" style="width:0"></span></span><span class="v soon">soon</span></div>
-            <div class="obar"><span class="k">LAST 24H</span><span class="track"><span class="fill" style="width:0"></span></span><span class="v soon">soon</span></div>
-          </div>
-          <div class="pending-row"><span class="k">◆ PENDING REWARD</span><span class="v" id="d-pending">—</span></div>
-          <div class="sub" id="d-pending-note">look up an address to see pending</div>
-        </div>
       </div>
 
-      <!-- effort / orphan -->
-      <div class="minitiles">
-        <div class="minitile"><div><div class="k">AVG EFFORT</div><span class="x">needs live hashrate</span></div><div class="v soon" style="font-size:15px;letter-spacing:2px">SOON</div></div>
-        <div class="minitile"><div><div class="k">ORPHANED / REJECT</div><span class="x" id="oj-note">share + submission health</span></div><div class="v" id="oj-val">—</div></div>
-      </div>
-
-      <!-- trend charts -->
-      <div class="charts2">
+      <div class="charts2" style="margin-top:20px">
         <div class="chartcard">
-          <div class="ch-head"><h3>Production trend</h3>
-            <div class="legend"><span><i class="g"></i>Pool output</span><span><i class="f"></i>Shares</span></div></div>
-          <div class="chartbox"><canvas id="prodchart"></canvas><div class="chart-soon hidden" id="prod-soon"></div></div>
+          <div class="ch-head"><h3>Miner hashrate</h3><div class="tf" data-chart="mh"><button data-d="1">1D</button><button data-d="3">3D</button><button class="active" data-d="7">1W</button><button data-d="14">2W</button><button data-d="30">1M</button><button data-d="0">ALL</button></div></div>
+          <div class="chartbox"><canvas id="c-mh" class="hidden"></canvas><div class="chart-soon" id="c-mh-e">Hashrate history builds as you check back — the pool exposes a live value, and we record it over time.</div></div>
         </div>
         <div class="chartcard">
-          <div class="ch-head"><h3>Hashrate trend</h3>
-            <div class="legend"><span><i class="g"></i>Pool</span><span><i class="f"></i>Network</span><span><i class="d"></i>Difficulty</span></div></div>
-          <div class="chartbox"><canvas id="hashchart"></canvas><div class="chart-soon" id="hash-soon">Hashrate trend goes live once the pool reports a live hashrate feed.</div></div>
+          <div class="ch-head"><h3>Shares over time</h3><div class="tf" data-chart="ms"><button data-d="1">1D</button><button data-d="3">3D</button><button class="active" data-d="7">1W</button><button data-d="14">2W</button><button data-d="30">1M</button><button data-d="0">ALL</button></div></div>
+          <div class="chartbox"><canvas id="c-ms" class="hidden"></canvas><div class="chart-soon" id="c-ms-e">Accepted shares over time — builds as the pool runs and you revisit.</div></div>
         </div>
       </div>
 
-      <!-- latest blocks -->
-      <div class="section-head" style="margin:34px 0 16px"><span class="tick">//</span><h2 style="font-size:18px">Latest blocks</h2><span class="muted" id="lb-meta" style="font-size:12.5px"></span></div>
-      <div id="blockgrid" class="blockgrid"><div class="empty-card">Loading…</div></div>
+      <div class="section-head" style="margin:30px 0 12px"><span class="tick">//</span><h2 style="font-size:18px">Activity</h2></div>
+      <div class="subtabs" id="acttabs" style="margin-bottom:14px">
+        <button class="subtab active" data-act="workers">WORKERS</button>
+        <button class="subtab" data-act="payments">PAYMENTS</button>
+        <button class="subtab" data-act="blocks">BLOCKS</button>
+      </div>
+      <div id="act-workers">
+        <div class="panel" style="padding:0;overflow-x:auto">
+          <table class="tbl"><thead><tr><th>WORKER</th><th>SHARES</th><th>TREND</th><th>LAST SHARE</th><th>STATUS</th></tr></thead>
+          <tbody id="wk-tbl"><tr><td colspan="5" class="muted">No workers reporting yet.</td></tr></tbody></table>
+        </div>
+        <p class="muted" style="font-size:12px;margin-top:8px">TREND = your worker's share-rate direction (a live proxy for hashrate) — <span class="delta up">▲</span> speeding up, <span class="delta down">▼</span> slowing, <span class="delta flat">▬</span> steady. Per-worker hashrate values arrive when the pool exposes them.</p>
+      </div>
+      <div id="act-payments" class="hidden">
+        <div class="panel" style="padding:0;overflow-x:auto">
+          <table class="tbl"><thead><tr><th>TIME</th><th>HEIGHT</th><th>DIR</th><th>AMOUNT</th><th>TX</th></tr></thead>
+          <tbody id="pay-tbl"><tr><td colspan="5" class="loading">…</td></tr></tbody></table>
+        </div>
+        <p class="muted" style="font-size:12px;margin-top:8px">On-chain transactions for this address via PearlTrack. Incoming (IN) entries are pool payouts.</p>
+      </div>
+      <div id="act-blocks" class="hidden">
+        <div class="panel" style="padding:0;overflow-x:auto">
+          <table class="tbl"><thead><tr><th>HEIGHT</th><th>WORKER</th><th>REWARD</th><th>STATUS</th></tr></thead>
+          <tbody id="mblk-tbl"><tr><td colspan="4" class="loading">…</td></tr></tbody></table>
+        </div>
+        <p class="muted" style="font-size:12px;margin-top:8px">Blocks this address found on Pearler Pool (live from p2.pearlerpool.com).</p>
+      </div>
     </section>
 
-    <!-- ============ BLOCKS ============ -->
-    <section class="view hidden" id="view-blocks">
-      <div class="section-head" style="margin:6px 0 16px"><span class="tick">//</span><h2 style="font-size:18px">Latest blocks</h2><span class="muted" style="font-size:12.5px">· Pearl network · via PearlTrack</span></div>
+    <!-- ============================ POOL ============================ -->
+    <section class="view hidden" id="view-pool">
+      <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:18px">
+        <div class="card"><div class="h">POOL HASHRATE <span class="delta flat" id="p-hr-delta" style="margin-left:6px">—</span></div><div class="big" style="font-size:23px;margin-top:8px" id="p-hr">—</div><div class="muted" style="font-size:12px">live · p2.pearlerpool.com</div></div>
+        <div class="card"><div class="h">BLOCKS FOUND</div><div class="big gold" style="font-size:23px;margin-top:8px" id="p-blocks">—</div><div class="muted" style="font-size:12px">by the pool</div></div>
+        <div class="card"><div class="h">POOL SHARE</div><div class="big" style="font-size:23px;margin-top:8px" id="p-share">—</div><div class="muted" style="font-size:12px">of network hashrate</div></div>
+        <div class="card"><div class="h">BLOCK REWARD</div><div class="big" style="font-size:23px;margin-top:8px" id="p-reward">—</div><div class="muted" style="font-size:12px">PRL · via PearlTrack</div></div>
+      </div>
+
+      <div class="grid c2" style="margin-bottom:4px">
+        <div>
+          <div class="section-head" style="margin:6px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Pool details</h2></div>
+          <div class="panel"><div class="kv">
+            <div class="kv-row"><span>HASHRATE</span><b id="p-hr2">—</b></div>
+            <div class="kv-row"><span>TOTAL SHARES</span><b id="p-shares">—</b></div>
+            <div class="kv-row"><span>ACTIVE SESSIONS</span><b id="p-sessions">—</b></div>
+            <div class="kv-row"><span>BLOCKS FOUND</span><b id="p-blocks2">—</b></div>
+            <div class="kv-row"><span>CURRENT HEIGHT</span><b id="p-height">—</b></div>
+            <div class="kv-row"><span>POOL FEE</span><b id="p-fee">—</b></div>
+            <div class="kv-row"><span>PAYOUT SCHEME</span><b id="p-scheme">PPLNS</b></div>
+            <div class="kv-row"><span>PPLNS WINDOW</span><b id="p-window">—</b></div>
+          </div></div>
+        </div>
+        <div>
+          <div class="section-head" style="margin:6px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Pool hashrate</h2><div class="tf" data-chart="ph" style="margin-left:auto"><button data-d="1">1D</button><button data-d="3">3D</button><button class="active" data-d="7">1W</button><button data-d="14">2W</button><button data-d="30">1M</button><button data-d="0">ALL</button></div></div>
+          <div class="chartcard"><div class="chartbox" style="height:250px"><canvas id="c-ph" class="hidden"></canvas><div class="chart-soon" id="c-ph-e">Pool hashrate history builds as the pool runs and you revisit.</div></div></div>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin:30px 0 14px"><span class="tick">//</span><h2 style="font-size:16px">Blocks found by the pool</h2><span class="muted" style="font-size:12px">· live · p2</span></div>
       <div class="panel" style="padding:0;overflow-x:auto">
-        <table class="tbl"><thead><tr><th>HEIGHT</th><th>AGE</th><th>POOL</th><th>REWARD</th><th>TXS</th></tr></thead>
-        <tbody id="blocks-tbl"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody></table>
+        <table class="tbl"><thead><tr><th>HEIGHT</th><th>WORKER</th><th>REWARD</th><th>STATUS</th></tr></thead>
+        <tbody id="pblk-tbl"><tr><td colspan="4" class="loading">Loading…</td></tr></tbody></table>
       </div>
     </section>
 
-    <!-- ============ ADDRESS (the edge) ============ -->
-    <section class="view hidden" id="view-address">
-      <div id="addr-empty" class="empty-card" style="margin-top:6px">Enter a <span class="gold">prl1…</span> address in the bar above to load its on-chain balance, transactions and pool activity.</div>
-
-      <div id="addr-body" class="hidden">
-        <!-- header -->
-        <div class="section-head" style="margin:2px 0 4px"><span class="tick">//</span><h2 style="font-size:18px">Miner dashboard</h2><span class="badge" id="md-mode" style="margin-left:auto">PPLNS</span></div>
-        <p class="mono-addr" id="md-addr" style="font-size:12.5px;color:var(--muted);margin:0 0 18px;word-break:break-all"></p>
-
-        <!-- top 4 stat cards -->
-        <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
-          <div class="card"><div class="h">BALANCE</div><div class="big gold" style="font-size:24px;margin-top:8px" id="md-balance">—</div><div class="muted" style="font-size:12px">PRL · pending payout</div></div>
-          <div class="card"><div class="h">HASHRATE</div><div class="big" id="md-hr" style="font-size:24px;margin-top:8px"><span class="soon" style="font-size:14px;letter-spacing:2px">SOON</span></div><div class="muted" style="font-size:12px">reported to the pool</div></div>
-          <div class="card"><div class="h">SHARES</div><div class="big" style="font-size:24px;margin-top:8px" id="md-shares">—</div><div class="muted" style="font-size:12px">accepted</div></div>
-          <div class="card"><div class="h">WORKERS</div><div class="big" style="font-size:24px;margin-top:8px" id="md-workers">—</div><div class="muted" style="font-size:12px">active</div></div>
-        </div>
-
-        <!-- two-col: statistics overview + miner hashrate chart -->
-        <div class="grid c2" style="margin-bottom:4px">
-          <div>
-            <div class="section-head" style="margin:6px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Statistics overview</h2></div>
-            <div class="panel"><div class="kv">
-              <div class="kv-row"><span>HASHRATE</span><b id="st-hr" class="muted">soon</b></div>
-              <div class="kv-row"><span>WORKERS</span><b id="st-workers">—</b></div>
-              <div class="kv-row"><span>SHARES</span><b id="st-shares">—</b></div>
-              <div class="kv-row"><span>LAST SHARE</span><b id="st-last">—</b></div>
-              <div class="kv-row"><span>ON-CHAIN BALANCE</span><b id="st-onchain">—</b></div>
-              <div class="kv-row"><span>PENDING BALANCE</span><b class="gold" id="st-pending">—</b></div>
-              <div class="kv-row"><span>TOTAL RECEIVED</span><b id="st-received">—</b></div>
-              <div class="kv-row"><span>PAYMENTS COUNT</span><b id="st-payments">—</b></div>
-              <div class="kv-row"><span>POOL SHARE</span><b id="st-poolshare">—</b></div>
-              <div class="kv-row"><span>MODE</span><b>PPLNS</b></div>
-            </div></div>
-          </div>
-          <div>
-            <div class="section-head" style="margin:6px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Miner hashrate (24h)</h2></div>
-            <div class="chartcard"><div class="ch-head"><h3>Your hashrate</h3><div class="legend"><span><i class="g"></i>1H</span><span><i class="f"></i>24H</span></div></div>
-              <div class="chartbox" style="height:230px"><canvas id="md-hrchart" class="hidden"></canvas><div class="chart-soon" id="md-hr-soon">Per-miner hashrate history goes live once the pool reports a live hashrate feed. Your shares, balance and payouts are live now.</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- your earnings -->
-        <div class="section-head" style="margin:28px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Your earnings</h2><span class="badge ok" id="md-price" style="margin-left:auto">PRL —</span></div>
-        <div class="panel">
-          <div class="kv">
-            <div class="kv-row"><span>EST. BLOCKS / DAY</span><b><input id="bpd" value="144" style="width:70px;background:transparent;border:1px solid var(--line);color:var(--fg);font-family:inherit;text-align:right;padding:3px 6px"/></b></div>
-            <div class="kv-row"><span>YOUR SHARE</span><b id="pc-share">—</b></div>
-            <div class="kv-row"><span>BLOCK REWARD</span><b id="pc-reward">—</b></div>
-            <div class="kv-row"><span>POOL FEE</span><b id="pc-fee">—</b></div>
-          </div>
-          <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px;display:flex;justify-content:space-between;align-items:baseline;gap:10px">
-            <span class="muted" style="font-size:12px">EST. DAILY</span><span style="text-align:right"><span class="big gold" id="pc-daily" style="font-size:26px">—</span> <span class="muted" id="pc-daily-usd" style="font-size:12.5px"></span></span>
-          </div>
-          <p class="muted" style="font-size:12.5px;margin-top:10px;line-height:1.6">Share-based estimate from your PPLNS contribution. Becomes precise once live hashrate is available.</p>
-        </div>
-
-        <!-- activity: workers / payments / blocks -->
-        <div class="section-head" style="margin:30px 0 12px"><span class="tick">//</span><h2 style="font-size:18px">Activity</h2></div>
-        <div class="subtabs" id="acttabs" style="margin-bottom:14px">
-          <button class="subtab active" data-act="workers">WORKERS</button>
-          <button class="subtab" data-act="payments">PAYMENTS</button>
-          <button class="subtab" data-act="blocks">BLOCKS</button>
-        </div>
-
-        <div id="act-workers">
-          <div class="panel" style="padding:0;overflow-x:auto">
-            <table class="tbl"><thead><tr><th>WORKER</th><th>HASHRATE (1H)</th><th>HASHRATE (24H)</th><th>SHARES</th><th>LAST SHARE</th><th>STATUS</th></tr></thead>
-            <tbody id="md-workers-tbl"><tr><td colspan="6" class="muted">No workers reporting yet.</td></tr></tbody></table>
-          </div>
-        </div>
-
-        <div id="act-payments" class="hidden">
-          <div class="panel" style="padding:0;overflow-x:auto">
-            <table class="tbl"><thead><tr><th>TIME</th><th>HEIGHT</th><th>DIR</th><th>AMOUNT</th><th>TX</th></tr></thead>
-            <tbody id="md-pay-tbl"><tr><td colspan="5" class="loading">…</td></tr></tbody></table>
-          </div>
-          <p class="muted" style="font-size:12px;margin-top:8px">On-chain transactions for this address via <a class="gold" href="https://pearltrack.io" target="_blank" rel="noopener">PearlTrack</a>. Incoming (IN) entries are pool payouts.</p>
-        </div>
-
-        <div id="act-blocks" class="hidden">
-          <div class="panel" style="padding:0;overflow-x:auto">
-            <table class="tbl"><thead><tr><th>HEIGHT</th><th>WORKER</th><th>REWARD</th><th>STATUS</th></tr></thead>
-            <tbody id="md-blocks-tbl"><tr><td colspan="4" class="loading">…</td></tr></tbody></table>
-          </div>
-          <p class="muted" style="font-size:12px;margin-top:8px">Blocks this address found on Pearler Pool (live from <a class="gold" href="https://p2.pearlerpool.com" target="_blank" rel="noopener">p2.pearlerpool.com</a>). Network-wide blocks are in the <button id="md-blocks-link" style="background:none;border:none;color:var(--gold);font-family:inherit;font-size:inherit;cursor:pointer;padding:0;text-decoration:underline">Blocks tab</button>.</p>
-        </div>
-
-        <!-- network performance (kept — the edge no other pool offers) -->
-        <div class="section-head" style="margin:34px 0 14px"><span class="tick">//</span><h2 style="font-size:15px">Network performance <span class="muted" style="font-size:12.5px">· hashrate &amp; difficulty (30d)</span></h2></div>
-        <div class="chartcard"><div class="ch-head"><h3>Network hashrate</h3><div class="legend"><span><i class="g"></i>Hashrate</span><span><i class="f"></i>Difficulty</span></div></div><div class="chartbox" style="height:230px"><canvas id="nethist"></canvas><div class="chart-soon hidden" id="nethist-empty"></div></div></div>
-        <p class="muted" style="font-size:12.5px;margin-top:8px;line-height:1.6">Pearl network hashrate and difficulty over the last 30 days, on-chain via <a class="gold" href="https://pearltrack.io" target="_blank" rel="noopener">PearlTrack</a>. Pool-specific performance history is coming next.</p>
+    <!-- ============================ NETWORK ============================ -->
+    <section class="view hidden" id="view-network">
+      <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:18px">
+        <div class="card"><div class="h">NETWORK HASHRATE <span class="delta flat" id="n-hr-delta" style="margin-left:6px">—</span></div><div class="big" style="font-size:23px;margin-top:8px" id="n-hr">—</div><div class="muted" style="font-size:12px">live · PearlTrack</div></div>
+        <div class="card"><div class="h">DIFFICULTY <span class="delta flat" id="n-diff-delta" style="margin-left:6px">—</span></div><div class="big" style="font-size:23px;margin-top:8px" id="n-diff">—</div><div class="muted" style="font-size:12px">current</div></div>
+        <div class="card"><div class="h">BLOCK REWARD</div><div class="big gold" style="font-size:23px;margin-top:8px" id="n-reward">—</div><div class="muted" style="font-size:12px">PRL · latest block</div></div>
+        <div class="card"><div class="h">PRL PRICE</div><div class="big" style="font-size:23px;margin-top:8px" id="n-price">—</div><div class="muted" style="font-size:12px" id="n-blocktime">block time —</div></div>
       </div>
-    </section>
 
-    <!-- ============ RANKING ============ -->
-    <section class="view hidden" id="view-ranking">
-      <div class="section-head" style="margin:6px 0 14px"><span class="tick">//</span><h2 style="font-size:18px">Top mining pools</h2><span class="muted" style="font-size:12.5px">· Pearl network · via PearlTrack</span></div>
+      <div class="section-head" style="margin:8px 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Network hashrate &amp; difficulty</h2><div class="tf" data-chart="nc" style="margin-left:auto"><button data-d="1">1D</button><button data-d="3">3D</button><button data-d="7">1W</button><button data-d="14">2W</button><button class="active" data-d="30">1M</button><button data-d="0">ALL</button></div></div>
+      <div class="chartcard"><div class="ch-head"><div class="legend"><span><i class="g"></i>Hashrate</span><span><i class="f"></i>Difficulty</span></div></div><div class="chartbox" style="height:250px"><canvas id="c-nc"></canvas><div class="chart-soon hidden" id="c-nc-e"></div></div></div>
+
+      <div class="section-head" style="margin:32px 0 12px"><span class="tick">//</span><h2 style="font-size:18px">Top mining pools</h2><span class="muted" style="font-size:12.5px">· via PearlTrack</span></div>
       <div style="border:1px solid rgba(201,168,76,.42);background:linear-gradient(180deg,rgba(201,168,76,.10),rgba(201,168,76,.015));padding:16px 18px;margin-bottom:16px">
         <div style="color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:8px">▲ WHY PEARLER POOL</div>
         <p style="font-size:13.5px;line-height:1.65;margin:0 0 12px;max-width:78ch">The most advanced tech on the network: a live miner dashboard, full on-chain transparency, Pearl network history no other pool shows, and AI-assisted one-command deploy — all on low-fee <b>PPLNS</b>. <b class="gold">Keep up to 25% more of what you mine.<span style="font-size:10px;vertical-align:super">*</span></b></p>
@@ -253,6 +203,12 @@
       <div class="panel" style="padding:0;overflow-x:auto">
         <table class="tbl"><thead><tr><th>#</th><th>POOL</th><th>HASHRATE</th><th>SHARE</th><th>FEE</th><th>24H BLOCKS</th></tr></thead>
         <tbody id="board"><tr><td colspan="6" class="loading">Loading…</td></tr></tbody></table>
+      </div>
+
+      <div class="section-head" style="margin:32px 0 12px"><span class="tick">//</span><h2 style="font-size:16px">Latest network blocks</h2><span class="muted" style="font-size:12px">· via PearlTrack</span></div>
+      <div class="panel" style="padding:0;overflow-x:auto">
+        <table class="tbl"><thead><tr><th>HEIGHT</th><th>AGE</th><th>POOL</th><th>REWARD</th><th>TXS</th></tr></thead>
+        <tbody id="nblk-tbl"><tr><td colspan="5" class="loading">Loading…</td></tr></tbody></table>
       </div>
     </section>
   </div>
@@ -268,289 +224,181 @@
 <script>
 (function(){
   PP.rain("rain");
-  var STATS=null, INFO=null, MINER=null, BLOCKS=[], RANGE_DAYS=1, PRICE=null;
-  var CIRC=289; // 2*pi*46
+  var STATS=null, INFO=null, MINERS=null, MINER=null, NETBLOCKS=null, NETPOOLS=null, NETHIST=null, NETHIST_TRIES=0;
+  var NET={hash:null,diff:null,price:null,blockTimeSec:194,rewardPRL:null};
 
-  /* ---------- view (sub-tab) switching ---------- */
+  /* ---------- helpers ---------- */
+  function txt(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function html(id,v){var e=document.getElementById(id);if(e)e.innerHTML=v;}
+  function feeFraction(){var p=PP.feePct(INFO);return p!=null?p/100:0.01;}
+  function savedAddr(){try{return localStorage.getItem("pp_addr")||"";}catch(e){return "";}}
+  function commas(n,d){return Number(n).toLocaleString("en-US",{maximumFractionDigits:d==null?2:d});}
+
+  /* ---------- localStorage time-series ---------- */
+  function Hget(key){try{return JSON.parse(localStorage.getItem(key)||"[]");}catch(e){return [];}}
+  function Hpush(key,pt,gap){var a=Hget(key);var last=a[a.length-1];if(!last||pt.t-last.t>=(gap||300000)){a.push(pt);if(a.length>3000)a.shift();try{localStorage.setItem(key,JSON.stringify(a));}catch(e){}}return a;}
+  function Hcut(a,days){if(!days)return a.slice();var c=Date.now()-days*864e5;var f=a.filter(function(p){return p.t>=c;});return f.length>=2?f:a.slice(-Math.min(a.length,40));}
+  function pctChange(a,field,days){
+    var cur=null;for(var i=a.length-1;i>=0;i--){if(a[i]&&a[i][field]!=null){cur=a[i];break;}}
+    if(!cur)return null;var c=Date.now()-days*864e5,b=null;
+    for(var j=0;j<a.length;j++){if(a[j][field]!=null&&a[j].t>=c){b=a[j];break;}}
+    if(!b){for(var k=0;k<a.length;k++){if(a[k][field]!=null){b=a[k];break;}}}
+    if(!b||b===cur||!b[field])return null;return (cur[field]-b[field])/b[field]*100;
+  }
+  function deltaEl(id,p){var e=document.getElementById(id);if(!e)return;if(p==null){e.className="delta flat";e.textContent="—";return;}
+    var up=p>0.05,dn=p<-0.05;e.className="delta "+(up?"up":dn?"down":"flat");e.textContent=(up?"▲ ":dn?"▼ ":"▬ ")+Math.abs(p).toFixed(1)+"%";}
+
+  /* ---------- view switching ---------- */
   function showView(v){
     document.querySelectorAll("#subtabs .subtab").forEach(function(b){b.classList.toggle("active",b.dataset.view===v);});
     document.querySelectorAll(".view").forEach(function(s){s.classList.add("hidden");});
-    document.getElementById("view-"+v).classList.remove("hidden");
-    if(v==="address") drawNetCharts();
-    if(v==="overview"){ drawProduction(); drawNetCharts(); }
+    var el=document.getElementById("view-"+v); if(el) el.classList.remove("hidden");
+    redrawAll();
   }
-  document.getElementById("subtabs").addEventListener("click",function(e){
-    var b=e.target.closest(".subtab"); if(b) showView(b.dataset.view);
-  });
-  document.getElementById("range").addEventListener("click",function(e){
-    var b=e.target.closest("button"); if(!b) return;
-    document.querySelectorAll("#range button").forEach(function(x){x.classList.remove("active");});
-    b.classList.add("active"); RANGE_DAYS=parseInt(b.dataset.days,10); drawProduction();
+  document.getElementById("subtabs").addEventListener("click",function(e){var b=e.target.closest(".subtab");if(b)showView(b.dataset.view);});
+  document.getElementById("acttabs").addEventListener("click",function(e){var b=e.target.closest(".subtab");if(!b)return;
+    document.querySelectorAll("#acttabs .subtab").forEach(function(x){x.classList.toggle("active",x===b);});
+    ["workers","payments","blocks"].forEach(function(k){document.getElementById("act-"+k).classList.toggle("hidden",k!==b.dataset.act);});});
+
+  /* ---------- per-chart timeframe pills ---------- */
+  var TF={mh:7,ms:7,ph:7,nc:30};
+  document.querySelectorAll(".tf").forEach(function(pills){
+    pills.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+      pills.querySelectorAll("button").forEach(function(x){x.classList.toggle("active",x===b);});
+      var d=parseInt(b.dataset.d,10); TF[pills.dataset.chart]=d===0?null:d; redrawAll();});
   });
 
-  /* ---------- load everything ---------- */
-  var NETBLOCKS=null, NETPOOLS=null;
-  Promise.all([PP.api("/stats"),PP.api("/pool/info")]).then(function(r){
-    STATS=r[0]; INFO=r[1];
-    recordPoolSnapshot();
-    renderOverview();
-    drawProduction();
+  /* ---------- init: pool + info + miners ---------- */
+  Promise.all([PP.api("/stats"),PP.api("/pool/info"),PP.apiRaw("/miners")]).then(function(r){
+    STATS=r[0]; INFO=r[1]; MINERS=r[2];
+    recordPool();
+    renderPool();
+    if(MINER) { recordMiner(); renderMinerTop(); }
     PP.mockNotice();
   });
-  // network latest blocks + top mining pools (PearlTrack)
+  loadNet(); loadNetHistory(); loadNetTables();
+
+  /* ---------- network (PearlTrack) ---------- */
+  function loadNet(){
+    PP.netApi("/summary").then(function(d){
+      if(d){
+        if(d.nethash!=null) NET.hash=Number(d.nethash);
+        if(d.difficulty!=null) NET.diff=Number(d.difficulty);
+        if(d.priceUSD!=null) NET.price=Number(d.priceUSD);
+        if(d.blockTimeSec!=null) NET.blockTimeSec=Number(d.blockTimeSec);
+        else if(d.blockTimeMs!=null) NET.blockTimeSec=Number(d.blockTimeMs)/1000;
+        else if(d.avgBlockTime!=null) NET.blockTimeSec=Number(d.avgBlockTime);
+      }
+      renderNetwork(); renderPool(); renderMinerTop(); renderEarnings();
+    });
+  }
   function loadNetTables(){
-    PP.netApi("/blocks").then(function(j){ NETBLOCKS=(j&&j.blocks)||[]; renderBlockGrid(); renderBlocksTable(); });
+    PP.netApi("/blocks").then(function(j){
+      NETBLOCKS=(j&&j.blocks)||[];
+      var rs=NETBLOCKS.slice(0,12).map(function(b){return Number(b.rewardGrains);}).filter(function(x){return x>0;}).sort(function(a,b){return a-b;});
+      if(rs.length){ NET.rewardPRL=rs[Math.floor(rs.length/2)]/1e8; }
+      renderNetBlocks(); renderNetwork(); renderPool(); renderEarnings();
+    });
     PP.netApi("/pools").then(function(j){ NETPOOLS=Array.isArray(j)?j:[]; renderBoard(); });
   }
-  loadNetTables();
-
-  /* ---------- overview ---------- */
-  function renderOverview(){
-    var acc=PP.blocksFound(STATS);
-    var rej=(STATS&&STATS.stratum&&STATS.stratum.rejected)||0;
-    // donut = share acceptance health (accepted/(accepted+rejected) of stratum shares)
-    var sAcc=(STATS&&STATS.stratum&&STATS.stratum.accepted)||0;
-    // share-acceptance health; with no live shares submitted (no rejects) treat as 100%
-    var health=(sAcc+rej)?sAcc/(sAcc+rej):1;
-    setDonut(health,(health*100).toFixed(1)+"%","SHARE ACCEPT");
-    // live pool hashrate (now real from p2 /stats)
-    var ph=PP.poolHashrate(STATS), phEl=document.getElementById("d-poolhash");
-    if(phEl){ if(ph){ phEl.innerHTML=ph.replace(/\s*([A-Za-z]+\/s)$/,' <small>$1</small>'); } else { phEl.innerHTML='<span class="soon" style="font-size:16px;letter-spacing:2px">SOON</span>'; } }
-    document.getElementById("d-out").textContent=PP.num(acc);
-    document.getElementById("d-out-r").textContent="blocks accepted · "+PP.num(STATS&&STATS.shares_total)+" shares";
-    document.getElementById("d-reward").textContent=PP.grainsToPRL(PP.job(STATS).reward_grains);
-    // orphan / reject
-    var subs=PP.subs(STATS), orphans=(subs.orphaned||0), subAcc=(subs.accepted||0);
-    var orphanPct=(subAcc+orphans)?orphans/(subAcc+orphans)*100:0;
-    var rejPct=(sAcc+rej)?rej/(sAcc+rej)*100:0;
-    document.getElementById("oj-val").textContent=orphanPct.toFixed(2)+"% / "+rejPct.toFixed(2)+"%";
-    document.getElementById("oj-note").textContent="orphan "+orphanPct.toFixed(2)+"% · reject "+rejPct.toFixed(2)+"%";
-    document.getElementById("lb-meta").textContent="latest height "+PP.num(PP.job(STATS).height);
-    renderBlockGrid();
-  }
-  function setDonut(frac,pct,cap){
-    frac=Math.max(0,Math.min(1,frac||0));
-    document.getElementById("donut-arc").setAttribute("stroke-dasharray",(frac*CIRC).toFixed(1)+" "+CIRC);
-    document.getElementById("donut-pct").textContent=pct;
-    document.getElementById("donut-cap").textContent=cap;
-  }
-
-  function renderBlockGrid(){
-    var g=document.getElementById("blockgrid"); if(!g) return;
-    if(NETBLOCKS===null){ g.innerHTML='<div class="empty-card">Loading latest network blocks…</div>'; return; }
-    if(!NETBLOCKS.length){ g.innerHTML='<div class="empty-card">No blocks yet.</div>'; return; }
-    g.innerHTML="";
-    NETBLOCKS.slice(0,10).forEach(function(b){
-      var c=document.createElement("div"); c.className="blockcard";
-      c.innerHTML='<div class="top"><span class="hgt">#'+PP.num(b.height)+'</span><span class="badge ok">'+(b.minerName||"—")+'</span></div>'+
-        '<div class="rew">'+PP.grainsToPRL(b.rewardGrains)+' PRL</div>'+
-        '<div class="time">'+PP.ago(b.timeMs)+' · '+PP.num(b.txCount)+' txs</div>';
-      g.appendChild(c);
+  function loadNetHistory(){
+    PP.netApi("/analytics?range=30d").then(function(j){
+      if(!j||!j.hashrate||!j.hashrate.length){ if(++NETHIST_TRIES<4) setTimeout(loadNetHistory,2500); else { var e=document.getElementById("c-nc-e"); if(e){e.textContent="Network history unavailable right now — reload to retry.";e.classList.remove("hidden");} } return; }
+      NETHIST={ hash:j.hashrate.map(function(p){return {t:p.timeMs,v:Number(p.value)};}),
+                diff:(j.difficulty||[]).map(function(p){return {t:p.timeMs,v:Number(p.value)};}) };
+      renderNetwork(); redrawAll();
     });
   }
 
-  /* ---------- blocks table ---------- */
-  function renderBlocksTable(){
-    var tb=document.getElementById("blocks-tbl"); if(!tb) return;
-    if(NETBLOCKS===null){ tb.innerHTML="<tr><td colspan='5' class='loading'>Loading…</td></tr>"; return; }
-    if(!NETBLOCKS.length){ tb.innerHTML="<tr><td colspan='5' class='muted'>No blocks yet.</td></tr>"; return; }
-    tb.innerHTML="";
-    NETBLOCKS.slice(0,40).forEach(function(b){
-      var tr=document.createElement("tr");
-      tr.innerHTML="<td>#"+PP.num(b.height)+"</td><td class='muted'>"+PP.ago(b.timeMs)+"</td><td>"+(b.minerName||"—")+"</td><td>"+PP.grainsToPRL(b.rewardGrains)+" PRL</td><td class='muted'>"+PP.num(b.txCount)+"</td>";
-      tb.appendChild(tr);
-    });
-  }
+  /* ---------- snapshots ---------- */
+  function recordPool(){ if(!STATS)return; Hpush("pp_pool",{t:Date.now(),hash:PP.hashToNum(PP.poolHashrate(STATS)),shares:Number(STATS.shares_total)||0,blocks:PP.blocksFound(STATS)},300000); }
+  function recordMiner(){ if(!MINER)return; var mh=PP.hashToNum(MINER.hashrate); Hpush("pp_m_"+MINER.addr,{t:Date.now(),hash:mh,shares:MINER.shares},300000); }
 
-  /* ---------- ranking ---------- */
-  function renderBoard(){
-    var tb=document.getElementById("board"); if(!tb) return;
-    if(NETPOOLS===null){ tb.innerHTML="<tr><td colspan='6' class='loading'>Loading…</td></tr>"; return; }
-    tb.innerHTML="";
-    // pinned: Pearler Pool (us) — clearly our own row, not a PearlTrack ranking
-    var ourFee=PP.feePct(INFO); ourFee=(ourFee!=null?ourFee+"%":"1%");
-    var ourHash=PP.poolHashrate(STATS)||"live";
-    var our=document.createElement("tr");
-    our.style.cssText="cursor:pointer;background:linear-gradient(90deg,rgba(201,168,76,.16),rgba(201,168,76,.02))";
-    our.onclick=function(){location.href="mine.html";};
-    our.innerHTML="<td><span class='gold'>★</span></td>"+
-      "<td><b class='gold'>Pearler Pool</b> <span class='badge ok' style='margin-left:4px'>BEST TECH</span></td>"+
-      "<td>"+ourHash+"</td>"+
-      "<td class='muted'>growing</td>"+
-      "<td class='gold'>"+ourFee+"</td>"+
-      "<td><span class='gold'>JOIN →</span></td>";
-    tb.appendChild(our);
-    if(!NETPOOLS.length){ return; }
-    NETPOOLS.forEach(function(p,i){
-      var eh=p.reportedHps?(Number(p.reportedHps)/1e18).toFixed(2)+" EH/s":"—";
-      var share=p.sharePct!=null?Number(p.sharePct).toFixed(1)+"%":"—";
-      var name=p.name||PP.addrShort(p.address);
-      var tr=document.createElement("tr"); tr.style.cursor="pointer";
-      tr.onclick=function(){ if(p.address){ document.getElementById("addr").value=p.address; lookup(p.address); } };
-      tr.innerHTML="<td>"+(i+1)+"</td><td>"+name+"</td><td>"+eh+"</td><td class='gold'>"+share+"</td><td class='muted'>"+(p.feePercent!=null?p.feePercent+"%":"—")+"</td><td>"+PP.num(p.blocks24h)+"</td>";
-      tb.appendChild(tr);
-    });
-  }
-
-  /* ---------- pool history (production trend, our local-snapshot MVP) ---------- */
-  function recordPoolSnapshot(){
-    try{
-      var arr=JSON.parse(localStorage.getItem("pp_pool_hist")||"[]");
-      var blocks=PP.blocksFound(STATS), shares=(STATS&&STATS.shares_total)||0;
-      var last=arr[arr.length-1];
-      if(!last||Date.now()-last.t>300000){arr.push({t:Date.now(),b:blocks,s:shares});if(arr.length>500)arr.shift();
-        localStorage.setItem("pp_pool_hist",JSON.stringify(arr));}
-    }catch(e){}
-  }
-  function poolHistory(){
-    var arr=[]; try{arr=JSON.parse(localStorage.getItem("pp_pool_hist")||"[]");}catch(e){}
-    if(PP.usingMock && arr.length<3){ // seed a lively sample so the chart is reviewable offline
-      arr=[]; var now=Date.now(), b=295000, s=1.6e6;
-      for(var i=40;i>=0;i--){ b+=Math.floor(200+Math.random()*900); s+=Math.floor(2000+Math.random()*9000);
-        arr.push({t:now-i*36e5, b:b+Math.floor((Math.random()-.5)*400), s:s}); }
-    }
-    var cut=Date.now()-RANGE_DAYS*864e5;
-    var f=arr.filter(function(p){return p.t>=cut;});
-    return f.length>=2?f:arr; // if range filters everything out, show all
-  }
-  function drawProduction(){
-    var cv=document.getElementById("prodchart"), soon=document.getElementById("prod-soon");
-    var pts=poolHistory();
-    if(pts.length<2){soon.classList.remove("hidden");soon.textContent="Production trend builds as the pool runs and you check back — first points are recording now.";cv.classList.add("hidden");return;}
-    soon.classList.add("hidden"); cv.classList.remove("hidden");
-    drawMulti(cv,[
-      {pts:pts.map(function(p){return {t:p.t,v:p.b};}),color:"#c9a84c",width:1.7,fill:true},
-      {pts:pts.map(function(p){return {t:p.t,v:p.s};}),color:"rgba(114,120,132,.85)",width:1.2,fill:false}
-    ]);
-  }
-
-  /* ---------- generic multi-line chart (each series normalized to its own range) ---------- */
-  function drawMulti(cv,series){
-    var w=cv.width=cv.clientWidth, h=cv.height=cv.clientHeight, pad=22;
-    var ctx=cv.getContext("2d"); ctx.clearRect(0,0,w,h);
-    var allT=[]; series.forEach(function(s){s.pts.forEach(function(p){allT.push(p.t);});});
-    var t0=Math.min.apply(0,allT), t1=Math.max.apply(0,allT); if(t1===t0)t1=t0+1;
-    function X(t){return pad+(t-t0)/(t1-t0)*(w-pad*2);}
-    var cs=getComputedStyle(document.documentElement);
-    var GRID=(cs.getPropertyValue("--grid")||"rgba(233,230,221,.07)").trim();
-    var DOT=(cs.getPropertyValue("--dot")||"#fff3d0").trim();
-    var GOLD=(cs.getPropertyValue("--gold")||"#c9a84c").trim();
-    ctx.strokeStyle=GRID;ctx.lineWidth=1;
-    for(var g=0;g<=3;g++){var gy=pad+g/3*(h-pad*2);ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(w-pad,gy);ctx.stroke();}
-    series.forEach(function(s){
-      var ys=s.pts.map(function(p){return p.v;}); var y0=Math.min.apply(0,ys),y1=Math.max.apply(0,ys); if(y1===y0)y1=y0+1;
-      function Y(v){return h-pad-(v-y0)/(y1-y0)*(h-pad*2);}
-      if(s.fill){
-        var grad=ctx.createLinearGradient(0,pad,0,h-pad);grad.addColorStop(0,"rgba(201,168,76,.20)");grad.addColorStop(1,"rgba(201,168,76,0)");
-        ctx.beginPath();ctx.moveTo(X(s.pts[0].t),Y(s.pts[0].v));s.pts.forEach(function(p){ctx.lineTo(X(p.t),Y(p.v));});
-        ctx.lineTo(X(s.pts[s.pts.length-1].t),h-pad);ctx.lineTo(X(s.pts[0].t),h-pad);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-      }
-      ctx.beginPath();ctx.moveTo(X(s.pts[0].t),Y(s.pts[0].v));s.pts.forEach(function(p){ctx.lineTo(X(p.t),Y(p.v));});
-      ctx.strokeStyle=s.fill?GOLD:s.color;ctx.lineWidth=s.width;ctx.stroke();
-      if(s.fill){var lp=s.pts[s.pts.length-1];ctx.fillStyle=DOT;ctx.beginPath();ctx.arc(X(lp.t),Y(lp.v),3,0,6.29);ctx.fill();}
-    });
-  }
-
-  /* ---------- address lookup (the edge) ---------- */
-  function feeFraction(){var p=PP.feePct(INFO);return p!=null?p/100:0.01;}
+  /* ===================== YOUR MINERS ===================== */
   function lookup(addr){
     addr=(addr||document.getElementById("addr").value||"").trim(); if(!addr) return;
-    showView("address");
-    document.getElementById("addr-empty").classList.add("hidden");
-    document.getElementById("addr-body").classList.remove("hidden");
+    try{localStorage.setItem("pp_addr",addr);}catch(e){}
+    showView("miners");
     Promise.all([PP.apiRaw("/miners/"+encodeURIComponent(addr)),PP.apiRaw("/miners")]).then(function(r){
-      var m=r[0]||{}, top=PP.topMiners(r[1]);
+      var m=r[0]||{}, top=PP.topMiners(r[1]||MINERS);
       var inTop=top.filter(function(x){return x.payout_addr===addr;})[0]||null;
-      var rewards=m.rewards || (inTop&&inTop.rewards) || {payed:null,pending:null};
-      MINER={ addr:addr, workers:m.workers||[], rewards:rewards,
-              hashrate: PP.minerHashrate(r[1],addr) || (m.hashrate?String(m.hashrate):null),
+      var rewards=m.rewards||(inTop&&inTop.rewards)||{payed:null,pending:null};
+      var workers=m.workers||[];
+      MINER={ addr:addr, workers:workers, rewards:rewards,
+              hashrate: PP.minerHashrate(r[1]||MINERS,addr)||(m.hashrate?String(m.hashrate):null),
+              shares: workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0),
               onPool: !!(r[0]||inTop) };
-      renderMiner();
+      recordMiner(); renderMinerTop(); renderWorkers(); renderEarnings(); redrawAll();
     });
     renderOnchain(addr);
-    loadPoolBlocks(addr);
+    loadMinerBlocks(addr);
   }
-  function renderMiner(){
-    document.getElementById("md-addr").textContent=MINER.addr;
-    document.getElementById("md-balance").textContent=PP.grainsToPRL(MINER.rewards.pending);
-    document.getElementById("st-pending").textContent=PP.grainsToPRL(MINER.rewards.pending)+" PRL";
-    // mirror pending into the overview card too
-    var dp=document.getElementById("d-pending"); if(dp) dp.textContent=PP.grainsToPRL(MINER.rewards.pending)+" PRL";
-    var dpn=document.getElementById("d-pending-note"); if(dpn) dpn.textContent="for "+PP.addrShort(MINER.addr);
-
-    var yourShares=MINER.workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0);
-    var poolShares=(STATS&&STATS.shares_total)||0;
-    var share=poolShares?yourShares/poolShares:0; share=Math.max(0,Math.min(share,1)); // clamp: snapshots can drift past 100%
-
-    var workers=MINER.workers.slice().filter(function(w){return (Number(w.shares)||0)>0 || w.last_share;});
-    document.getElementById("md-shares").textContent=PP.num(yourShares);
-    document.getElementById("md-workers").textContent=PP.num(MINER.workers.length);
-    document.getElementById("st-shares").textContent=PP.num(yourShares);
+  function renderMinerTop(){
+    if(!MINER)return;
+    txt("m-addr",MINER.addr);
+    html("m-balance",PP.grainsToPRL(MINER.rewards.pending));
+    txt("s-pending",PP.grainsToPRL(MINER.rewards.pending)+" PRL");
+    var hr=MINER.hashrate;
+    html("m-hr",hr?hr.replace(/\s*([A-Za-z]+\/s)$/,' <small>$1</small>'):'<span class="soon" style="font-size:14px;letter-spacing:2px">SOON</span>');
+    txt("s-hr",hr||"soon");
+    txt("m-shares",PP.num(MINER.shares));
+    txt("s-shares2",PP.num(MINER.shares));
+    txt("m-workers",PP.num(MINER.workers.length));
+    var online=MINER.workers.filter(function(w){return w.last_share&&Date.now()-Number(w.last_share)<15*60000;}).length;
+    txt("m-workers-sub",online+" online");
+    txt("s-workers",PP.num(MINER.workers.length));
     var lastTs=MINER.workers.reduce(function(m,w){var t=Number(w.last_share)||0;return t>m?t:m;},0);
-    document.getElementById("st-last").textContent=lastTs?PP.ago(lastTs):"—";
-    document.getElementById("st-poolshare").textContent=(share*100).toFixed(share*100<1?3:2)+"%";
-
-    // live hashrate (real from p2 /miners) + worker count
-    var hr=MINER.hashrate, mdhr=document.getElementById("md-hr"), sthr=document.getElementById("st-hr");
-    if(hr){ if(mdhr) mdhr.innerHTML=hr.replace(/\s*([A-Za-z]+\/s)$/,' <small>$1</small>'); if(sthr){ sthr.textContent=hr; sthr.className=""; } }
-    else { if(mdhr) mdhr.innerHTML='<span class="soon" style="font-size:14px;letter-spacing:2px">SOON</span>'; if(sthr){ sthr.textContent="soon"; sthr.className="muted"; } }
-    var stw=document.getElementById("st-workers"); if(stw) stw.textContent=PP.num(MINER.workers.length);
-
-    // workers table (Alpha-style)
-    var tb=document.getElementById("md-workers-tbl"); tb.innerHTML="";
-    if(!MINER.workers.length){ tb.innerHTML="<tr><td colspan='6' class='muted'>"+(MINER.onPool?"No workers reporting for this address yet.":"This address isn't mining on Pearler Pool — its on-chain balance and transactions are shown below.")+"</td></tr>"; }
-    else MINER.workers.forEach(function(w){
-      var fresh=w.last_share && (Date.now()-Number(w.last_share)<15*60000);
+    txt("s-last",lastTs?PP.ago(lastTs):"—");
+    var mh=PP.hashToNum(MINER.hashrate);
+    txt("s-netshare",(mh&&NET.hash)?fmtShare(mh/NET.hash):"—");
+    deltaEl("m-hr-delta",pctChange(Hget("pp_m_"+MINER.addr),"hash",1));
+  }
+  function fmtShare(f){ f=Math.max(0,f); var p=f*100; return p<0.001?p.toFixed(5)+"%":p<1?p.toFixed(3)+"%":p.toFixed(2)+"%"; }
+  function renderEarnings(){
+    if(!MINER){return;}
+    var mh=PP.hashToNum(MINER.hashrate);
+    var netShare=(mh&&NET.hash)?mh/NET.hash:null;
+    var reward=NET.rewardPRL, bpd=86400/(NET.blockTimeSec||194), fee=feeFraction();
+    var daily=(netShare!=null&&reward)?netShare*bpd*reward*(1-fee):null;
+    txt("me-netshare",netShare!=null?fmtShare(netShare):"—");
+    txt("me-reward",reward?commas(reward)+" PRL":"—");
+    txt("me-bpd",bpd?commas(bpd,0):"—");
+    txt("me-fee",(fee*100)+"%");
+    html("me-daily",daily!=null?commas(daily,3)+" PRL":"—");
+    txt("me-daily-usd",(daily!=null&&NET.price)?"≈ $"+commas(daily*NET.price):"");
+    txt("me-weekly",daily!=null?commas(daily*7)+" PRL":"—");
+    txt("me-monthly",daily!=null?commas(daily*30)+" PRL":"—");
+    if(NET.price!=null){var pb=document.getElementById("m-price");if(pb)pb.textContent="PRL $"+NET.price.toFixed(4);}
+  }
+  function renderWorkers(){
+    var tb=document.getElementById("wk-tbl"); if(!tb)return; tb.innerHTML="";
+    if(!MINER.workers.length){ tb.innerHTML="<tr><td colspan='5' class='muted'>"+(MINER.onPool?"No workers reporting yet.":"This address isn't mining on Pearler Pool — its on-chain balance and transactions are shown below.")+"</td></tr>"; return; }
+    var key="pp_wk_"+MINER.addr, store={}; try{store=JSON.parse(localStorage.getItem(key)||"{}");}catch(e){}
+    var now=Date.now(), nstore={};
+    MINER.workers.forEach(function(w){
+      var name=w.name||"worker", sh=Number(w.shares)||0, prev=store[name], arrow="flat";
+      if(!prev){ nstore[name]={shares:sh,t:now,rate:null,arrow:"flat"}; }
+      else if(now-prev.t>=120000){ var rate=(sh-prev.shares)/((now-prev.t)/1000); var a=prev.rate!=null?(rate>prev.rate*1.03?"up":rate<prev.rate*0.97?"down":"flat"):"flat"; nstore[name]={shares:sh,t:now,rate:rate,arrow:a}; }
+      else { nstore[name]=prev; }
+      arrow=nstore[name].arrow||"flat";
+      var ar=arrow==="up"?'<span class="delta up">▲ up</span>':arrow==="down"?'<span class="delta down">▼ down</span>':'<span class="delta flat">▬ steady</span>';
+      var fresh=w.last_share&&(now-Number(w.last_share)<15*60000);
       var status=fresh?"<span class='badge ok'>ONLINE</span>":"<span class='badge orphan'>IDLE</span>";
       var tr=document.createElement("tr");
-      tr.innerHTML="<td>"+PP.wname(w.name||"worker")+"</td><td class='muted'>soon</td><td class='muted'>soon</td><td>"+PP.num(w.shares)+"</td><td class='muted'>"+(w.last_share?PP.ago(w.last_share):"—")+"</td><td>"+status+"</td>";
+      tr.innerHTML="<td>"+PP.wname(name)+"</td><td>"+PP.num(sh)+"</td><td>"+ar+"</td><td class='muted'>"+(w.last_share?PP.ago(w.last_share):"—")+"</td><td>"+status+"</td>";
       tb.appendChild(tr);
     });
-    profit(share);
+    try{localStorage.setItem(key,JSON.stringify(nstore));}catch(e){}
   }
-  function profit(share){
-    var bpd=parseFloat(document.getElementById("bpd").value)||0;
-    var rew=PP.rewardPRL(STATS), fee=feeFraction(), daily=share*bpd*rew*(1-fee);
-    document.getElementById("pc-share").textContent=(share*100).toFixed(3)+"%";
-    document.getElementById("pc-reward").textContent=rew.toLocaleString("en-US",{maximumFractionDigits:2})+" PRL";
-    document.getElementById("pc-fee").textContent=(fee*100)+"%";
-    document.getElementById("pc-daily").textContent=daily.toLocaleString("en-US",{maximumFractionDigits:3})+" PRL";
-    var usd=document.getElementById("pc-daily-usd");
-    if(usd) usd.textContent=(PRICE!=null)?("≈ $"+(daily*PRICE).toLocaleString("en-US",{maximumFractionDigits:2})):"";
-  }
-  document.getElementById("bpd").addEventListener("input",function(){
-    if(!MINER)return; var ys=MINER.workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0);
-    var ps=(STATS&&STATS.shares_total)||0; profit(Math.max(0,Math.min(ps?ys/ps:0,1)));
-  });
-
-  /* ---------- pool blocks found by this address (p2 /pool/blocks) ---------- */
-  function loadPoolBlocks(addr){
-    var tb=document.getElementById("md-blocks-tbl"); if(!tb) return;
-    tb.innerHTML="<tr><td colspan='4' class='loading'>…</td></tr>";
-    PP.apiRaw("/pool/blocks").then(function(d){
-      var list=PP.blockList(d).filter(function(b){return b.miner_address===addr;});
-      tb.innerHTML="";
-      if(!list.length){ tb.innerHTML="<tr><td colspan='4' class='muted'>No blocks found by this address on Pearler Pool yet.</td></tr>"; return; }
-      list.slice(0,40).forEach(function(b){
-        var st=(b.submit_status||"").toUpperCase(), cls=st==="ACCEPTED"?"ok":st==="ORPHAN"?"orphan":"bad";
-        var tr=document.createElement("tr");
-        tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td>"+PP.wname(b.worker_name)+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";
-        tb.appendChild(tr);
-      });
-    });
-  }
-
-  /* ---------- on-chain address details (PearlTrack, for ANY address) ---------- */
   function renderOnchain(addr){
-    ["st-onchain","st-received","st-payments"].forEach(function(i){var e=document.getElementById(i);if(e)e.textContent="…";});
-    document.getElementById("md-pay-tbl").innerHTML="<tr><td colspan='5' class='loading'>loading on-chain…</td></tr>";
+    ["s-onchain","s-received","s-payments"].forEach(function(i){txt(i,"…");});
+    document.getElementById("pay-tbl").innerHTML="<tr><td colspan='5' class='loading'>loading on-chain…</td></tr>";
     PP.netApi("/address/"+encodeURIComponent(addr)).then(function(a){
-      var tb=document.getElementById("md-pay-tbl");
-      if(!a){ ["st-onchain","st-received","st-payments"].forEach(function(i){document.getElementById(i).textContent="—";});
-        tb.innerHTML="<tr><td colspan='5' class='muted'>On-chain data unavailable (deployed site only).</td></tr>"; return; }
-      document.getElementById("st-onchain").textContent=PP.grainsToPRL(a.balanceGrains)+" PRL";
-      document.getElementById("st-received").textContent=PP.grainsToPRL(a.totalReceivedGrains)+" PRL";
-      document.getElementById("st-payments").textContent=PP.num(a.txCount);
+      var tb=document.getElementById("pay-tbl");
+      if(!a){ ["s-onchain","s-received","s-payments"].forEach(function(i){txt(i,"—");}); tb.innerHTML="<tr><td colspan='5' class='muted'>On-chain data unavailable.</td></tr>"; return; }
+      txt("s-onchain",PP.grainsToPRL(a.balanceGrains)+" PRL");
+      txt("s-received",PP.grainsToPRL(a.totalReceivedGrains)+" PRL");
+      txt("s-payments",PP.num(a.txCount));
       var list=a.txs||[]; tb.innerHTML="";
       if(!list.length){tb.innerHTML="<tr><td colspan='5' class='muted'>No transactions.</td></tr>";}
       list.slice(0,20).forEach(function(t){
@@ -561,66 +409,137 @@
       });
     });
   }
-
-  /* ---------- network performance history (PearlTrack analytics) ---------- */
-  var NETHIST=null, NETHIST_TRIES=0;
-  function setNetEmpty(msg){
-    var ad=document.getElementById("nethist-empty");
-    if(ad){ ad.textContent=msg; ad.classList.remove("hidden"); }
-  }
-  function loadNetHistory(){
-    if(!NETHIST) setNetEmpty("Loading Pearl network history…");
-    PP.netApi("/analytics?range=30d").then(function(j){
-      if(!j||!j.hashrate||!j.hashrate.length){
-        if(++NETHIST_TRIES<4){ setTimeout(loadNetHistory,2500); }
-        else { setNetEmpty("Network history is unavailable right now — reload to retry."); }
-        return;
-      }
-      NETHIST={ hash:j.hashrate.map(function(p){return {t:p.timeMs,v:Number(p.value)/1e18};}),
-                diff:(j.difficulty||[]).map(function(p){return {t:p.timeMs,v:Number(p.value)};}) };
-      drawNetCharts();
+  function loadMinerBlocks(addr){
+    var tb=document.getElementById("mblk-tbl"); if(!tb)return; tb.innerHTML="<tr><td colspan='4' class='loading'>…</td></tr>";
+    PP.apiRaw("/pool/blocks").then(function(d){
+      var list=PP.blockList(d).filter(function(b){return b.miner_address===addr;});
+      tb.innerHTML=""; if(!list.length){tb.innerHTML="<tr><td colspan='4' class='muted'>No blocks found by this address on Pearler Pool yet.</td></tr>";return;}
+      list.slice(0,40).forEach(function(b){ tb.appendChild(blockRow(b)); });
     });
   }
-  function drawNetCharts(){
-    if(!NETHIST||!NETHIST.hash.length) return;
-    var series=[{pts:NETHIST.hash,color:"#c9a84c",width:1.7,fill:true}];
-    if(NETHIST.diff.length) series.push({pts:NETHIST.diff,color:"rgba(120,126,138,.9)",width:1.2,fill:false});
-    [["hashchart","hash-soon"],["nethist","nethist-empty"]].forEach(function(p){
-      var cv=document.getElementById(p[0]); if(!cv) return;
-      if(!cv.clientWidth||!cv.clientHeight) return; // hidden / zero-size: redraw runs on tab show + resize
-      cv.classList.remove("hidden"); var ov=document.getElementById(p[1]); if(ov) ov.classList.add("hidden");
-      drawMulti(cv,series);
+  function blockRow(b){var st=(b.submit_status||"").toUpperCase(),cls=st==="ACCEPTED"?"ok":st==="ORPHAN"?"orphan":"bad";var tr=document.createElement("tr");
+    tr.innerHTML="<td>#"+PP.num(b.block_height)+"</td><td>"+PP.wname(b.worker_name)+"</td><td>"+PP.grainsToPRL(b.block_reward)+" PRL</td><td><span class='badge "+cls+"'>"+(st||"—")+"</span></td>";return tr;}
+
+  /* ===================== POOL ===================== */
+  function renderPool(){
+    var ph=PP.poolHashrate(STATS);
+    html("p-hr",ph?ph.replace(/\s*([A-Za-z]+\/s)$/,' <small>$1</small>'):'<span class="soon" style="font-size:15px">SOON</span>');
+    txt("p-hr2",ph||"—");
+    txt("p-blocks",PP.num(PP.blocksFound(STATS)));
+    txt("p-blocks2",PP.num(PP.blocksFound(STATS)));
+    txt("p-shares",PP.num(STATS&&STATS.shares_total));
+    txt("p-sessions",PP.num(PP.activeMiners(STATS)));
+    txt("p-height",PP.num(PP.job(STATS).height));
+    var fee=PP.feePct(INFO); txt("p-fee",fee!=null?fee+"%":"—");
+    txt("p-window",PP.pplnsWindow(INFO)!=null?PP.num(PP.pplnsWindow(INFO))+" shares":"—");
+    txt("p-reward",NET.rewardPRL?commas(NET.rewardPRL):"—");
+    var phn=PP.hashToNum(ph);
+    txt("p-share",(phn&&NET.hash)?fmtShare(phn/NET.hash):"—");
+    deltaEl("p-hr-delta",pctChange(Hget("pp_pool"),"hash",TF.ph||1));
+    if(PBLOCKS===null) loadPoolBlocks();
+    else renderPoolBlocks();
+  }
+  var PBLOCKS=null;
+  function loadPoolBlocks(){ PBLOCKS=[]; PP.apiRaw("/pool/blocks").then(function(d){ PBLOCKS=PP.blockList(d); renderPoolBlocks(); }); }
+  function renderPoolBlocks(){ var tb=document.getElementById("pblk-tbl"); if(!tb)return; tb.innerHTML="";
+    if(!PBLOCKS||!PBLOCKS.length){tb.innerHTML="<tr><td colspan='4' class='muted'>No blocks yet.</td></tr>";return;}
+    PBLOCKS.slice(0,50).forEach(function(b){tb.appendChild(blockRow(b));}); }
+
+  /* ===================== NETWORK ===================== */
+  function renderNetwork(){
+    html("n-hr",NET.hash?PP.fmtHash(NET.hash).replace(/\s*([A-Za-z]+\/s)$/,' <small>$1</small>'):"—");
+    txt("n-diff",NET.diff?(NET.diff>=1e6?commas(NET.diff/1e6,1)+"M":commas(NET.diff,0)):"—");
+    txt("n-reward",NET.rewardPRL?commas(NET.rewardPRL):"—");
+    txt("n-price",NET.price!=null?"$"+NET.price.toFixed(4):"—");
+    txt("n-blocktime","block time "+(NET.blockTimeSec?Math.round(NET.blockTimeSec)+"s":"—"));
+    if(NETHIST){ deltaEl("n-hr-delta",pctChange(NETHIST.hash.map(function(p){return {t:p.t,hash:p.v};}),"hash",TF.nc||30));
+                 deltaEl("n-diff-delta",pctChange(NETHIST.diff.map(function(p){return {t:p.t,d:p.v};}),"d",TF.nc||30)); }
+  }
+  function renderNetBlocks(){
+    var tb=document.getElementById("nblk-tbl"); if(!tb)return;
+    if(NETBLOCKS===null){tb.innerHTML="<tr><td colspan='5' class='loading'>Loading…</td></tr>";return;}
+    if(!NETBLOCKS.length){tb.innerHTML="<tr><td colspan='5' class='muted'>No blocks.</td></tr>";return;}
+    tb.innerHTML=""; NETBLOCKS.slice(0,40).forEach(function(b){var tr=document.createElement("tr");
+      tr.innerHTML="<td>#"+PP.num(b.height)+"</td><td class='muted'>"+PP.ago(b.timeMs)+"</td><td>"+(b.minerName||"—")+"</td><td>"+PP.grainsToPRL(b.rewardGrains)+" PRL</td><td class='muted'>"+PP.num(b.txCount)+"</td>";
+      tb.appendChild(tr);});
+  }
+  function renderBoard(){
+    var tb=document.getElementById("board"); if(!tb)return;
+    if(NETPOOLS===null){tb.innerHTML="<tr><td colspan='6' class='loading'>Loading…</td></tr>";return;}
+    tb.innerHTML="";
+    var ourFee=PP.feePct(INFO); ourFee=(ourFee!=null?ourFee+"%":"1%");
+    var ourHash=PP.poolHashrate(STATS)||"live";
+    var our=document.createElement("tr"); our.style.cssText="cursor:pointer;background:linear-gradient(90deg,rgba(201,168,76,.16),rgba(201,168,76,.02))";
+    our.onclick=function(){location.href="mine.html";};
+    our.innerHTML="<td><span class='gold'>★</span></td><td><b class='gold'>Pearler Pool</b> <span class='badge ok' style='margin-left:4px'>BEST TECH</span></td><td>"+ourHash+"</td><td class='muted'>growing</td><td class='gold'>"+ourFee+"</td><td><span class='gold'>JOIN →</span></td>";
+    tb.appendChild(our);
+    if(!NETPOOLS.length)return;
+    NETPOOLS.forEach(function(p,i){
+      var eh=p.reportedHps?PP.fmtHash(Number(p.reportedHps)):"—";
+      var share=p.sharePct!=null?Number(p.sharePct).toFixed(1)+"%":"—";
+      var name=p.name||PP.addrShort(p.address);
+      var tr=document.createElement("tr");
+      tr.innerHTML="<td>"+(i+1)+"</td><td>"+name+"</td><td>"+eh+"</td><td class='gold'>"+share+"</td><td class='muted'>"+(p.feePercent!=null?p.feePercent+"%":"—")+"</td><td>"+PP.num(p.blocks24h)+"</td>";
+      tb.appendChild(tr);
     });
   }
 
+  /* ===================== charts ===================== */
+  function drawMulti(cv,series){
+    var w=cv.width=cv.clientWidth,h=cv.height=cv.clientHeight,pad=24;var ctx=cv.getContext("2d");ctx.clearRect(0,0,w,h);
+    if(!w||!h)return;
+    var allT=[];series.forEach(function(s){s.pts.forEach(function(p){allT.push(p.t);});});
+    if(allT.length<2)return;var t0=Math.min.apply(0,allT),t1=Math.max.apply(0,allT);if(t1===t0)t1=t0+1;
+    function X(t){return pad+(t-t0)/(t1-t0)*(w-pad*2);}
+    var cs=getComputedStyle(document.documentElement);
+    var GRID=(cs.getPropertyValue("--grid")||"rgba(233,230,221,.07)").trim(),DOT=(cs.getPropertyValue("--dot")||"#fff3d0").trim(),GOLD=(cs.getPropertyValue("--gold")||"#c9a84c").trim();
+    ctx.strokeStyle=GRID;ctx.lineWidth=1;for(var g=0;g<=3;g++){var gy=pad+g/3*(h-pad*2);ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(w-pad,gy);ctx.stroke();}
+    series.forEach(function(s){
+      var ys=s.pts.map(function(p){return p.v;});var y0=Math.min.apply(0,ys),y1=Math.max.apply(0,ys);if(y1===y0){y1=y0+1;y0-=1;}
+      function Y(v){return h-pad-(v-y0)/(y1-y0)*(h-pad*2);}
+      if(s.fill){var grad=ctx.createLinearGradient(0,pad,0,h-pad);grad.addColorStop(0,"rgba(201,168,76,.20)");grad.addColorStop(1,"rgba(201,168,76,0)");
+        ctx.beginPath();ctx.moveTo(X(s.pts[0].t),Y(s.pts[0].v));s.pts.forEach(function(p){ctx.lineTo(X(p.t),Y(p.v));});
+        ctx.lineTo(X(s.pts[s.pts.length-1].t),h-pad);ctx.lineTo(X(s.pts[0].t),h-pad);ctx.closePath();ctx.fillStyle=grad;ctx.fill();}
+      ctx.beginPath();ctx.moveTo(X(s.pts[0].t),Y(s.pts[0].v));s.pts.forEach(function(p){ctx.lineTo(X(p.t),Y(p.v));});
+      ctx.strokeStyle=s.fill?GOLD:s.color;ctx.lineWidth=s.width;ctx.stroke();
+      if(s.fill){var lp=s.pts[s.pts.length-1];ctx.fillStyle=DOT;ctx.beginPath();ctx.arc(X(lp.t),Y(lp.v),3,0,6.29);ctx.fill();}
+    });
+  }
+  function drawHistChart(canvasId,emptyId,points,color){
+    var cv=document.getElementById(canvasId),em=document.getElementById(emptyId);if(!cv)return;
+    var pts=points.filter(function(p){return p.v!=null&&!isNaN(p.v);});
+    if(pts.length<2){cv.classList.add("hidden");if(em){em.classList.remove("hidden");}return;}
+    if(!cv.clientWidth||!cv.clientHeight){return;}
+    cv.classList.remove("hidden");if(em)em.classList.add("hidden");
+    drawMulti(cv,[{pts:pts,color:color||"#c9a84c",width:1.7,fill:true}]);
+  }
+  function redrawAll(){
+    if(MINER){
+      var mh=Hcut(Hget("pp_m_"+MINER.addr),TF.mh);
+      drawHistChart("c-mh","c-mh-e",mh.map(function(p){return {t:p.t,v:p.hash};}));
+      drawHistChart("c-ms","c-ms-e",mh.map(function(p){return {t:p.t,v:p.shares};}));
+    }
+    var pool=Hcut(Hget("pp_pool"),TF.ph);
+    drawHistChart("c-ph","c-ph-e",pool.map(function(p){return {t:p.t,v:p.hash};}));
+    if(NETHIST){
+      var days=TF.nc; var hs=NETHIST.hash.slice(),ds=NETHIST.diff.slice();
+      if(days){var c=Date.now()-days*864e5;hs=hs.filter(function(p){return p.t>=c;});ds=ds.filter(function(p){return p.t>=c;});}
+      var cv=document.getElementById("c-nc"),em=document.getElementById("c-nc-e");
+      if(cv&&hs.length>=2&&cv.clientWidth){cv.classList.remove("hidden");if(em)em.classList.add("hidden");
+        var series=[{pts:hs.map(function(p){return {t:p.t,v:p.v};}),color:"#c9a84c",width:1.7,fill:true}];
+        if(ds.length>=2)series.push({pts:ds.map(function(p){return {t:p.t,v:p.v};}),color:"rgba(120,126,138,.9)",width:1.2,fill:false});
+        drawMulti(cv,series);}
+    }
+  }
+
+  /* ---------- events + boot ---------- */
   document.getElementById("go").onclick=function(){lookup();};
   document.getElementById("addr").addEventListener("keydown",function(e){if(e.key==="Enter")lookup();});
-
-  /* ---------- activity sub-tabs (workers / payments / blocks) ---------- */
-  document.getElementById("acttabs").addEventListener("click",function(e){
-    var b=e.target.closest(".subtab"); if(!b) return;
-    var a=b.dataset.act;
-    document.querySelectorAll("#acttabs .subtab").forEach(function(x){x.classList.toggle("active",x===b);});
-    ["workers","payments","blocks"].forEach(function(k){
-      document.getElementById("act-"+k).classList.toggle("hidden",k!==a);
-    });
-  });
-  document.getElementById("md-blocks-link").addEventListener("click",function(){showView("blocks");});
-  if(location.hash.length>4){var a=decodeURIComponent(location.hash.slice(1));document.getElementById("addr").value=a;lookup(a);}
-  addEventListener("resize",function(){drawProduction();drawNetCharts();});
-  addEventListener("pp-theme",function(){drawProduction();drawNetCharts();});
-  // live network hashrate / difficulty from PearlTrack (same-origin /net-api proxy)
-  PP.netApi("/summary").then(function(d){
-    if(!d) return;
-    if(d.priceUSD!=null){ PRICE=Number(d.priceUSD);
-      var pb=document.getElementById("md-price"); if(pb) pb.textContent="PRL $"+PRICE.toFixed(4);
-      if(MINER) profit(Math.max(0,Math.min((STATS&&STATS.shares_total)?MINER.workers.reduce(function(a,w){return a+(Number(w.shares)||0);},0)/STATS.shares_total:0,1))); }
-    if(d.nethash){ var el=document.getElementById("d-nethash"); if(el) el.innerHTML=(Number(d.nethash)/1e18).toFixed(2)+' <small>EH/s</small>'; }
-    var sub=document.getElementById("d-net-sub"); if(sub) sub.textContent="live · via PearlTrack";
-    var lb=document.getElementById("lb-meta");
-    if(lb) lb.textContent="latest height "+PP.num(PP.job(STATS).height)+" · network "+(d.nethash?(Number(d.nethash)/1e18).toFixed(2)+" EH/s":"—")+(d.difficulty?" · diff "+(Number(d.difficulty)/1e6).toFixed(1)+"M":"")+" · via PearlTrack";
-  });
-  loadNetHistory();
+  addEventListener("resize",redrawAll);
+  addEventListener("pp-theme",redrawAll);
+  var startAddr=(location.hash.length>4?decodeURIComponent(location.hash.slice(1)):"")||savedAddr()||PP.POOL_ADDR;
+  document.getElementById("addr").value=startAddr;
+  lookup(startAddr);
 })();
 </script>
 </body>
