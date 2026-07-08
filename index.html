@@ -65,7 +65,7 @@
   <section class="container" style="padding:22px 0 8px">
     <div class="grid c2">
       <div>
-        <div class="section-head" style="margin:0 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Recently found blocks</h2><span class="muted" style="font-size:12px">· by the pool</span></div>
+        <div class="section-head" style="margin:0 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Latest Pearl blocks</h2><span class="muted" style="font-size:12px">· network · via PearlTrack</span></div>
         <div class="panel" style="padding:6px 0" id="blk-feed"><div class="loading" style="padding:14px 18px">Loading…</div></div>
       </div>
       <div>
@@ -116,14 +116,11 @@
       '<span class="'+(rcls||'')+'" style="flex:none;font-weight:500">'+right+'</span></div>';
   }
   // recently found blocks (pool)
-  PP.apiRaw("/pool/blocks").then(function(d){
-    var el=document.getElementById("blk-feed");
-    var list=PP.blockList(d)
-      .filter(function(b){return (b.submit_status||"").toUpperCase()==="ACCEPTED";})
-      .sort(function(a,b){return (b.block_height||0)-(a.block_height||0);});
-    if(!list.length){ el.innerHTML='<div class="loading" style="padding:14px 18px">No confirmed blocks yet — be the first.</div>'; return; }
+  PP.netApi("/blocks").then(function(j){
+    var el=document.getElementById("blk-feed"), list=(j&&j.blocks)||[];
+    if(!list.length){ el.innerHTML='<div class="loading" style="padding:14px 18px">Loading blocks…</div>'; return; }
     el.innerHTML=list.slice(0,6).map(function(b){
-      return feedRow("#"+PP.num(b.block_height), "accepted", PP.grainsToPRL(b.block_reward)+" PRL");
+      return feedRow("#"+PP.num(b.height), (b.minerName||"—")+" · "+PP.ago(b.timeMs), PP.grainsToPRL(b.rewardGrains)+" PRL");
     }).join("");
   });
   // recent payouts (outgoing txs from the pool payout address, on-chain via PearlTrack)
