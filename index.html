@@ -62,6 +62,19 @@
     </div>
   </section>
 
+  <section class="container" style="padding:22px 0 8px">
+    <div class="grid c2">
+      <div>
+        <div class="section-head" style="margin:0 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Recently found blocks</h2><span class="muted" style="font-size:12px">· by the pool</span></div>
+        <div class="panel" style="padding:6px 0" id="blk-feed"><div class="loading" style="padding:14px 18px">Loading…</div></div>
+      </div>
+      <div>
+        <div class="section-head" style="margin:0 0 12px"><span class="tick">//</span><h2 style="font-size:15px">Recent payouts</h2><span class="muted" style="font-size:12px">· to miners</span></div>
+        <div class="panel" style="padding:6px 0" id="pay-feed"><div class="loading" style="padding:14px 18px">Loading…</div></div>
+      </div>
+    </div>
+  </section>
+
   <footer class="footer"><div class="inner">
     <span>PEARLERPOOL.COM</span>
     <span class="foot-links"><a href="mine.html">MINE</a> · <a href="dashboard.html">DASHBOARD</a> · <a href="calculator.html">CALCULATOR</a> · <a href="faq.html">FAQ</a> · <a href="about.html">ABOUT</a> · <a href="terms.html">TERMS</a> · <a href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">DISCORD</a></span>
@@ -93,6 +106,32 @@
     if(!d) return;
     if(d.nethash) document.getElementById("s-nethash").innerHTML=(Number(d.nethash)/1e18).toFixed(2)+' <small>EH/s</small>';
     if(d.priceUSD!=null) document.getElementById("s-price").innerHTML='$'+Number(d.priceUSD).toFixed(4);
+  });
+
+  /* ---------- live activity feeds ---------- */
+  function feedRow(left,mid,right,rcls){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 18px;border-top:1px solid var(--line-2);font-size:13.5px">'+
+      '<span class="gold" style="flex:none">'+left+'</span>'+
+      '<span class="muted" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+mid+'</span>'+
+      '<span class="'+(rcls||'')+'" style="flex:none;font-weight:500">'+right+'</span></div>';
+  }
+  // recently found blocks (pool)
+  PP.apiRaw("/pool/blocks").then(function(d){
+    var list=PP.blockList(d), el=document.getElementById("blk-feed");
+    if(!list.length){ el.innerHTML='<div class="loading" style="padding:14px 18px">No blocks yet — be the first.</div>'; return; }
+    el.innerHTML=list.slice(0,6).map(function(b){
+      var st=(b.submit_status||"").toUpperCase();
+      return feedRow("#"+PP.num(b.block_height), (st==="ACCEPTED"?"accepted":st.toLowerCase()||"—"), PP.grainsToPRL(b.block_reward)+" PRL");
+    }).join("");
+  });
+  // recent payouts (outgoing txs from the pool payout address, on-chain via PearlTrack)
+  PP.netApi("/address/"+PP.POOL_ADDR).then(function(a){
+    var el=document.getElementById("pay-feed");
+    var outs=((a&&a.txs)||[]).filter(function(t){return t.direction==="out";});
+    if(!outs.length){ el.innerHTML='<div class="loading" style="padding:14px 18px">'+(a?"No payouts yet.":"Payout feed available on the deployed site.")+'</div>'; return; }
+    el.innerHTML=outs.slice(0,6).map(function(t){
+      return feedRow(PP.ago(t.timeMs), (t.txid?t.txid.slice(0,10)+"…":"payout"), PP.grainsToPRL(t.valueGrains)+" PRL");
+    }).join("");
   });
 })();
 </script>

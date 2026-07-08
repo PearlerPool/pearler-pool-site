@@ -46,7 +46,12 @@
       <input id="addr" placeholder="your prl1… payout address (optional)" spellcheck="false" />
       <button id="addr-apply">APPLY</button>
     </div>
-    <p class="muted" style="font-size:12.5px;margin-top:12px;letter-spacing:.5px">Base pool network fee is <span class="gold">1%</span> (live from /pool/info) — it applies to every option below.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;max-width:560px">
+      <input id="worker" placeholder="worker name (optional)" spellcheck="false" style="flex:1;min-width:170px;background:var(--surface-1);border:1px solid var(--line);color:var(--fg);font-family:inherit;font-size:14px;padding:11px 14px;outline:none" />
+      <input id="mdl" placeholder="MDL address — merged mining (optional)" spellcheck="false" style="flex:2;min-width:200px;background:var(--surface-1);border:1px solid var(--line);color:var(--fg);font-family:inherit;font-size:14px;padding:11px 14px;outline:none" />
+    </div>
+    <p class="muted" id="mm-note" style="font-size:12px;margin-top:8px;letter-spacing:.3px;display:none">⛏ Merged mining on — your worker password becomes <b class="gold">x;mdl=&lt;your MDL address&gt;</b>, so you earn MDL alongside PRL for the same work. Requires merge-mining to be enabled on the pool; if a build rejects it, drop the tag or ask on <a class="gold" href="https://discord.gg/w6tTBXTh" target="_blank" rel="noopener">Discord</a>.</p>
+    <p class="muted" style="font-size:12.5px;margin-top:10px;letter-spacing:.5px">Base pool network fee is <span class="gold">1%</span> (live from /pool/info) — it applies to every option below.</p>
   </header>
 
   <!-- THE FOUR OPTIONS -->
@@ -72,7 +77,9 @@
 <script>
 (function(){
   PP.rain("rain");
-  var ADDR="YOUR_PRL_ADDRESS", INFO=null;
+  var ADDR="YOUR_PRL_ADDRESS", INFO=null, WORKER="", MDL="";
+  function wk(){ return WORKER || "$(hostname)"; }              // worker name token
+  function passwd(){ return MDL ? ("x;mdl="+MDL) : "x"; }       // merged-mining password (append ;mdl=<addr>)
 
   // fee line shown prominently on each option
   function feeBlock(n,note){
@@ -137,8 +144,8 @@
       feeNote:"PEARLER MINER FEE · PLUS 1% POOL NETWORK FEE",
       title:"Our custom miner, tuned for Pearler Pool and the easiest way in. Recommended for most hunters.",
       miner:"the Pearler Pool miner",
-      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name pearler-miner \\\n  -e POOL_HOST="+s.host+" \\\n  -e POOL_PORT="+s.port_tls+" -e POOL_TLS=1 \\\n  -e WALLET="+ADDR+" \\\n  -e WORKER=$(hostname) \\\n  registry.pearlerpool.com/pearler-miner:latest";},
-      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name pearler-miner \\\n     -e POOL_HOST="+s.host+" -e POOL_PORT="+s.port_tls+" -e POOL_TLS=1 \\\n     -e WALLET="+ADDR+" -e WORKER=$(hostname) \\\n     registry.pearlerpool.com/pearler-miner:latest";},
+      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name pearler-miner \\\n  -e POOL_HOST="+s.host+" \\\n  -e POOL_PORT="+s.port_tls+" -e POOL_TLS=1 \\\n  -e WALLET="+ADDR+" \\\n  -e WORKER="+wk()+(MDL?" \\\n  -e POOL_PASS="+passwd():"")+" \\\n  registry.pearlerpool.com/pearler-miner:latest";},
+      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name pearler-miner \\\n     -e POOL_HOST="+s.host+" -e POOL_PORT="+s.port_tls+" -e POOL_TLS=1 \\\n     -e WALLET="+ADDR+" -e WORKER="+wk()+(MDL?" -e POOL_PASS="+passwd():"")+" \\\n     registry.pearlerpool.com/pearler-miner:latest";},
       logname:"pearler-miner"
     },
     akoya:{
@@ -147,8 +154,8 @@
       feeNote:"OPEN SOURCE · ONLY THE 1% POOL NETWORK FEE",
       title:"The open-source alpha-miner — the public, audited Docker image alphaminetech/pearl-miner, 0% miner fee. This one works today (no waiting on a pool image), so it's the quickest real start.",
       miner:"the open-source alpha-miner (public Docker image alphaminetech/pearl-miner) pointed at Pearler Pool",
-      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name alpha-miner \\\n  -e PEARL_ADDRESS="+ADDR+" \\\n  -e PEARL_WORKER=$(hostname) \\\n  -e PEARL_POOL_HOST="+s.host+" \\\n  -e PEARL_POOL_PORT="+s.port_plain+" \\\n  alphaminetech/pearl-miner";},
-      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name alpha-miner \\\n     -e PEARL_ADDRESS="+ADDR+" -e PEARL_WORKER=$(hostname) \\\n     -e PEARL_POOL_HOST="+s.host+" -e PEARL_POOL_PORT="+s.port_plain+" \\\n     alphaminetech/pearl-miner";},
+      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name alpha-miner \\\n  -e PEARL_ADDRESS="+ADDR+" \\\n  -e PEARL_WORKER="+wk()+(MDL?" \\\n  -e PEARL_MDL_ADDRESS="+MDL:"")+" \\\n  -e PEARL_POOL_HOST="+s.host+" \\\n  -e PEARL_POOL_PORT="+s.port_plain+" \\\n  alphaminetech/pearl-miner";},
+      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name alpha-miner \\\n     -e PEARL_ADDRESS="+ADDR+" -e PEARL_WORKER="+wk()+(MDL?" -e PEARL_MDL_ADDRESS="+MDL:"")+" \\\n     -e PEARL_POOL_HOST="+s.host+" -e PEARL_POOL_PORT="+s.port_plain+" \\\n     alphaminetech/pearl-miner";},
       logname:"alpha-miner"
     },
     official:{
@@ -157,8 +164,8 @@
       feeNote:"STANDARD BUILD · ONLY THE 1% POOL NETWORK FEE",
       title:"The official Perl reference miner — the standard build, no extra miner fee.",
       miner:"the official Perl miner, pointed at Pearler Pool",
-      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name perl-miner \\\n  ghcr.io/pearl/miner:latest \\\n  --pool stratum+ssl://"+s.host+":"+s.port_tls+" \\\n  --user "+ADDR+".$(hostname) --pass x";},
-      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name perl-miner \\\n     ghcr.io/pearl/miner:latest \\\n     --pool stratum+ssl://"+s.host+":"+s.port_tls+" --user "+ADDR+".$(hostname) --pass x";},
+      cmd:function(s){return "docker run -d --gpus all --restart unless-stopped \\\n  --name perl-miner \\\n  ghcr.io/pearl/miner:latest \\\n  --pool stratum+ssl://"+s.host+":"+s.port_tls+" \\\n  --user "+ADDR+"."+wk()+" --pass "+passwd();},
+      runline:function(s){return "docker run -d --gpus all --restart unless-stopped --name perl-miner \\\n     ghcr.io/pearl/miner:latest \\\n     --pool stratum+ssl://"+s.host+":"+s.port_tls+" --user "+ADDR+"."+wk()+" --pass "+passwd();},
       logname:"perl-miner"
     },
     connect:{
@@ -166,7 +173,7 @@
       fee:"0% fee",
       feeNote:"BRING YOUR OWN MINER · ONLY THE 1% POOL NETWORK FEE",
       title:"Already have a miner? Point it straight at the pool — no Docker, no extra fee. TLS is recommended.",
-      cmd:function(s){return "# Point any compatible miner at Pearler Pool\nURL  (TLS)  : stratum+ssl://"+s.host+":"+s.port_tls+"   # recommended\nURL  (plain): stratum+tcp://"+s.host+":"+s.port_plain+"\nUSER        : "+ADDR+".<WORKER_NAME>\nPASS        : x\nPROTOCOL    : "+s.protocol;}
+      cmd:function(s){return "# Point any compatible miner at Pearler Pool\nURL  (TLS)  : stratum+ssl://"+s.host+":"+s.port_tls+"   # recommended\nURL  (plain): stratum+tcp://"+s.host+":"+s.port_plain+"\nUSER        : "+ADDR+"."+(WORKER||"<WORKER_NAME>")+"\nPASS        : "+passwd()+(MDL?"   # merged mining: PRL + MDL":"")+"\nPROTOCOL    : "+s.protocol;}
     }
   };
 
@@ -202,8 +209,8 @@
               '<ul class="steps">'+
                 '<li>Open your miner’s config and add a new pool / stratum URL.</li>'+
                 '<li>Set the URL to <b>stratum+ssl://'+s.host+':'+s.port_tls+'</b> (TLS) or <b>stratum+tcp://'+s.host+':'+s.port_plain+'</b> (plain).</li>'+
-                '<li>Set the <b>username</b> to <span class="gold">'+ADDR+'</span><b>.&lt;worker&gt;</b> — your prl1 address, a dot, then any worker name.</li>'+
-                '<li>Set the <b>password</b> to <b>x</b> and save.</li>'+
+                '<li>Set the <b>username</b> to <span class="gold">'+ADDR+'</span><b>.'+(WORKER||"&lt;worker&gt;")+'</b> — your prl1 address, a dot, then any worker name.</li>'+
+                '<li>Set the <b>password</b> to <b>'+passwd()+'</b>'+(MDL?" (this enables merged MDL mining)":"")+' and save.</li>'+
                 '<li>Start the miner and confirm it on the <a class="gold" href="dashboard.html">dashboard</a> once shares come in.</li>'+
               '</ul>'+
             '</div>'+
@@ -250,6 +257,9 @@
 
   function applyAddr(){
     var v=document.getElementById("addr").value.trim(); ADDR=v||"YOUR_PRL_ADDRESS";
+    WORKER=(document.getElementById("worker").value||"").trim().replace(/[^a-zA-Z0-9_-]/g,"").slice(0,32);
+    MDL=(document.getElementById("mdl").value||"").trim();
+    document.getElementById("mm-note").style.display=MDL?"block":"none";
     // keep the currently active tab active across re-render
     var active=document.querySelector("#opt-tabs .tab.active");
     var key=active?active.dataset.pane:"pearler";
@@ -259,7 +269,11 @@
     }
   }
   document.getElementById("addr-apply").onclick=applyAddr;
-  document.getElementById("addr").addEventListener("keydown",function(e){if(e.key==="Enter")applyAddr();});
+  ["addr","worker","mdl"].forEach(function(id){
+    var el=document.getElementById(id);
+    el.addEventListener("keydown",function(e){if(e.key==="Enter")applyAddr();});
+    el.addEventListener("change",applyAddr);
+  });
 
   PP.api("/pool/info").then(function(info){
     INFO=info;
