@@ -117,11 +117,13 @@
   }
   // recently found blocks (pool)
   PP.apiRaw("/pool/blocks").then(function(d){
-    var list=PP.blockList(d), el=document.getElementById("blk-feed");
-    if(!list.length){ el.innerHTML='<div class="loading" style="padding:14px 18px">No blocks yet — be the first.</div>'; return; }
+    var el=document.getElementById("blk-feed");
+    var list=PP.blockList(d)
+      .filter(function(b){return (b.submit_status||"").toUpperCase()==="ACCEPTED";})
+      .sort(function(a,b){return (b.block_height||0)-(a.block_height||0);});
+    if(!list.length){ el.innerHTML='<div class="loading" style="padding:14px 18px">No confirmed blocks yet — be the first.</div>'; return; }
     el.innerHTML=list.slice(0,6).map(function(b){
-      var st=(b.submit_status||"").toUpperCase();
-      return feedRow("#"+PP.num(b.block_height), (st==="ACCEPTED"?"accepted":st.toLowerCase()||"—"), PP.grainsToPRL(b.block_reward)+" PRL");
+      return feedRow("#"+PP.num(b.block_height), "accepted", PP.grainsToPRL(b.block_reward)+" PRL");
     }).join("");
   });
   // recent payouts (outgoing txs from the pool payout address, on-chain via PearlTrack)
