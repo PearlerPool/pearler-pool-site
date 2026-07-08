@@ -62,6 +62,19 @@
   }
   function rewardPRL(stats) { var j = job(stats); return j.reward_grains != null ? Number(j.reward_grains) / GRAINS_PER_PRL : 0; }
   function poolHashrate(stats) { return stats && stats.hashrate != null ? String(stats.hashrate) : null; } // live pool hashrate, pre-formatted e.g. "124.64 GH/s"
+  var POOL_ADDR = "prl1ps04hu7s8nzmn3t7mdf8c6jwtk7pzfxw4p7p6avxge367a8xnfzcq7c26dk"; // Pearler Pool payout address (default lookup)
+  var HU = { H: 1, KH: 1e3, MH: 1e6, GH: 1e9, TH: 1e12, PH: 1e15, EH: 1e18, ZH: 1e21 };
+  function hashToNum(s) { // "32.66 PH/s" -> 3.266e16 (H/s); accepts number too
+    if (s == null) return null; if (typeof s === "number") return s;
+    var m = String(s).match(/([\d.]+)\s*([KMGTPEZ]?H)\/?s/i); if (!m) { var n = parseFloat(s); return isNaN(n) ? null : n; }
+    return parseFloat(m[1]) * (HU[m[2].toUpperCase()] || 1);
+  }
+  function fmtHash(n) { // number H/s -> "x.xx UH/s"
+    if (n == null || isNaN(n) || n <= 0) return "—";
+    var u = ["H", "KH", "MH", "GH", "TH", "PH", "EH", "ZH"], i = 0; n = Number(n);
+    while (n >= 1000 && i < u.length - 1) { n /= 1000; i++; }
+    return n.toFixed(2) + " " + u[i] + "/s";
+  }
   function minerHashrate(miners, addr) { var l = topMiners(miners); for (var i = 0; i < l.length; i++) { if (l[i].payout_addr === addr && l[i].hashrate != null) return String(l[i].hashrate); } return null; }
   function pplnsWindow(info) { var e = info && info.economics; return e && e.pplns_window_shares != null ? e.pplns_window_shares : null; }
 
@@ -147,6 +160,7 @@
 
   PP.api = api; PP.apiRaw = apiRaw; PP.job = job; PP.subs = subs; PP.blocksFound = blocksFound; PP.activeMiners = activeMiners;
   PP.feePct = feePct; PP.rewardPRL = rewardPRL; PP.poolHashrate = poolHashrate; PP.minerHashrate = minerHashrate; PP.pplnsWindow = pplnsWindow;
+  PP.hashToNum = hashToNum; PP.fmtHash = fmtHash; PP.POOL_ADDR = POOL_ADDR;
   PP.topMiners = topMiners; PP.blockList = blockList; PP.workerList = workerList;
   PP.num = num; PP.grainsToPRL = grainsToPRL; PP.addrShort = addrShort; PP.wname = wname; PP.ago = ago;
   PP.countUp = countUp; PP.copy = copy; PP.mockNotice = mockNotice; PP.rain = rain; PP.netApi = netApi;
