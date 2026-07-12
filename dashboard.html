@@ -42,10 +42,10 @@
     <h1 style="font-size:clamp(28px,4.4vw,44px)">Track the hunt.</h1>
     <p style="max-width:64ch">Manage your miners, the pool and the Pearl network in one place — live hashrate, earnings, blocks and history. Miner &amp; pool data from <span class="gold">p2.pearlerpool.com</span>; network data on-chain via <a class="gold" href="https://pearltrack.io" target="_blank" rel="noopener">PearlTrack</a>.</p>
     <div class="lookup" style="margin-top:20px">
-      <input id="addr" placeholder="prl1… address" spellcheck="false" />
+      <input id="addr" placeholder="your prl1… payout address" spellcheck="false" />
       <button id="go">LOOK UP</button>
     </div>
-    <p class="muted" style="font-size:12px;margin-top:8px">Defaults to the Pearler Pool address and remembers your last lookup.</p>
+    <p class="muted" style="font-size:12px;margin-top:8px">Enter your prl1… payout address — it's saved on this device so you can pick up where you left off.</p>
   </header>
 
   <div class="container">
@@ -65,7 +65,7 @@
       <div style="display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-bottom:18px">
         <div class="card"><div class="h">BALANCE</div><div class="big gold" style="font-size:23px;margin-top:8px" id="m-balance">—</div><div class="muted" style="font-size:12px">PRL · pending payout</div></div>
         <div class="card"><div class="h">HASHRATE <span class="delta flat" id="m-hr-delta" style="margin-left:6px">—</span></div><div class="big" style="font-size:23px;margin-top:8px" id="m-hr">—</div><div class="muted" style="font-size:12px">reported to the pool</div></div>
-        <div class="card"><div class="h">SHARES</div><div class="big" style="font-size:23px;margin-top:8px" id="m-shares">—</div><div class="muted" style="font-size:12px">accepted (PPLNS)</div></div>
+        <div class="card"><div class="h">SHARES</div><div class="big" style="font-size:23px;margin-top:8px" id="m-shares">—</div><div class="muted" style="font-size:12px">accepted shares · lifetime</div></div>
         <div class="card"><div class="h">WORKERS</div><div class="big" style="font-size:23px;margin-top:8px" id="m-workers">—</div><div class="muted" style="font-size:12px" id="m-workers-sub">active</div></div>
       </div>
 
@@ -289,9 +289,9 @@
         if(d.nethash!=null) NET.hash=Number(d.nethash);
         if(d.difficulty!=null) NET.diff=Number(d.difficulty);
         if(d.priceUSD!=null) NET.price=Number(d.priceUSD);
-        if(d.blockTimeSec!=null) NET.blockTimeSec=Number(d.blockTimeSec);
-        else if(d.blockTimeMs!=null) NET.blockTimeSec=Number(d.blockTimeMs)/1000;
-        else if(d.avgBlockTime!=null) NET.blockTimeSec=Number(d.avgBlockTime);
+        if(d.avgBlockTimeSeconds!=null) NET.blockTimeSec=Number(d.avgBlockTimeSeconds);   // live network average
+        else if(d.blockTimeTargetSeconds!=null) NET.blockTimeSec=Number(d.blockTimeTargetSeconds);
+        if(d.blockSubsidyPRL!=null) NET.rewardPRL=Number(d.blockSubsidyPRL);              // exact block subsidy (accurate)
       }
       renderNetwork(); renderPool(); renderMinerTop(); renderEarnings();
     });
@@ -299,8 +299,10 @@
   function loadNetTables(){
     PP.netApi("/blocks").then(function(j){
       NETBLOCKS=(j&&j.blocks)||[];
-      var rs=NETBLOCKS.slice(0,12).map(function(b){return Number(b.rewardGrains);}).filter(function(x){return x>0;}).sort(function(a,b){return a-b;});
-      if(rs.length){ NET.rewardPRL=rs[Math.floor(rs.length/2)]/1e8; }
+      if(NET.rewardPRL==null){ // fallback only — /summary blockSubsidyPRL is preferred
+        var rs=NETBLOCKS.slice(0,12).map(function(b){return Number(b.rewardGrains);}).filter(function(x){return x>0;}).sort(function(a,b){return a-b;});
+        if(rs.length){ NET.rewardPRL=rs[Math.floor(rs.length/2)]/1e8; }
+      }
       renderNetBlocks(); renderNetwork(); renderPool(); renderEarnings();
     });
     PP.netApi("/pools").then(function(j){ NETPOOLS=Array.isArray(j)?j:[]; renderBoard(); });
@@ -379,7 +381,8 @@
     if(!MINER.workers.length){ tb.innerHTML="<tr><td colspan='5' class='muted'>"+(MINER.onPool?"No workers reporting yet.":"This address isn't mining on Pearler Pool — its on-chain balance and transactions are shown below.")+"</td></tr>"; return; }
     var key="pp_wk_"+MINER.addr, store={}; try{store=JSON.parse(localStorage.getItem(key)||"{}");}catch(e){}
     var now=Date.now(), nstore={};
-    MINER.workers.forEach(function(w){
+    var sorted=MINER.workers.slice().sort(function(a,b){return (Number(b.last_share)||0)-(Number(a.last_share)||0);}); // most-recent (online) first
+    sorted.forEach(function(w){
       var name=w.name||"worker", sh=Number(w.shares)||0, prev=store[name], arrow="flat";
       if(!prev){ nstore[name]={shares:sh,t:now,rate:null,arrow:"flat"}; }
       else if(now-prev.t>=120000){ var rate=(sh-prev.shares)/((now-prev.t)/1000); var a=prev.rate!=null?(rate>prev.rate*1.03?"up":rate<prev.rate*0.97?"down":"flat"):"flat"; nstore[name]={shares:sh,t:now,rate:rate,arrow:a}; }
@@ -541,9 +544,9 @@
   document.getElementById("addr").addEventListener("keydown",function(e){if(e.key==="Enter")lookup();});
   addEventListener("resize",redrawAll);
   addEventListener("pp-theme",redrawAll);
-  var startAddr=(location.hash.length>4?decodeURIComponent(location.hash.slice(1)):"")||savedAddr()||PP.POOL_ADDR;
-  document.getElementById("addr").value=startAddr;
-  lookup(startAddr);
+  var startAddr=(location.hash.length>4?decodeURIComponent(location.hash.slice(1)):"")||savedAddr();
+  if(startAddr){ document.getElementById("addr").value=startAddr; lookup(startAddr); }
+  else { html("m-addr",'<span class="gold">Enter your prl1… address above</span> to track your miners, hashrate and earnings — it’s saved on this device for next time.'); }
 })();
 </script>
 </body>
