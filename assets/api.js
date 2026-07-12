@@ -135,8 +135,11 @@
 
   /* ---------- ui helpers ---------- */
   function countUp(el, target, opts) {
-    opts = opts || {}; var dur = 900, start = performance.now();
-    function step(now) { var p = Math.min(1, (now - start) / dur), e = 1 - Math.pow(1 - p, 3), v = Math.floor(target * e); el.textContent = opts.format ? opts.format(v) : v.toLocaleString("en-US"); if (p < 1) requestAnimationFrame(step); }
+    opts = opts || {};
+    var fin = opts.format ? opts.format(Math.floor(target)) : Math.floor(target).toLocaleString("en-US");
+    if (document.hidden) { el.textContent = fin; return; }   // background tabs pause requestAnimationFrame — show the value now
+    var dur = 900, start = performance.now();
+    function step(now) { var p = Math.min(1, (now - start) / dur), e = 1 - Math.pow(1 - p, 3), v = Math.floor(target * e); el.textContent = opts.format ? opts.format(v) : v.toLocaleString("en-US"); if (p < 1) requestAnimationFrame(step); else el.textContent = fin; }
     requestAnimationFrame(step);
   }
   function copy(text, btn) { navigator.clipboard.writeText(text).then(function () { if (!btn) return; var o = btn.textContent; btn.textContent = "COPIED"; btn.classList.add("done"); setTimeout(function () { btn.textContent = o; btn.classList.remove("done"); }, 1600); }); }
